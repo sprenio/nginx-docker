@@ -1,0 +1,24 @@
+name: "nginx"
+
+services:
+
+  nginx:
+    container_name: nginx
+    image: nginx:1.25.4
+    hostname: nginx
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443" # Comment this out for internal calls when SSL encryption is enabled in the external layer
+    restart: always
+    working_dir: /etc/nginx
+    volumes:
+      - ${NGINX_CONF_DIR:-./config}/sites/prod:/etc/nginx/sites
+      - ${NGINX_CONF_DIR:-./config}/nginx.conf:/etc/nginx/nginx.conf
+      - ${NGINX_CONF_DIR:-./config}/default_server.conf:/etc/nginx/default_server.conf
+      - ${NGINX_CONF_DIR:-./config}/snippets/phalconapp.conf:/etc/nginx/snippets/phalconapp.conf
+      - ${NGINX_CONF_DIR:-./config}/snippets/php-fpm.conf:/etc/nginx/snippets/php-fpm.conf
+      - ${NGINX_CONF_DIR:-./config}/snippets/https-def.conf:/etc/nginx/snippets/https-def.conf
+      - ${WWW_SRC_DIR:-./src}:/var/www/src
+      - ${CERT_CHALLENGE_DIR:-./cert_challenge}:/var/www/cert_challenge:ro
+      - ${SSL_CERTIFICATES_DIR:-./ssl_certificates}:/var/www/ssl_certificates:ro
+      - ${NGINX_LOGS_DIR:-../logs/nginx}:/var/log/nginx
