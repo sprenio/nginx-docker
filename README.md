@@ -5,9 +5,9 @@
 * Create config files:
   * `${NGINX_CONF_DIR}/default_server.conf` - configuration of default server; you can copy `./templates/config/default_server.conf` file
   * `${NGINX_CONF_DIR}/nginx.conf` - nginx configuration; you can copy `./templates/config/nginx.conf` file
-  * `${NGINX_CONF_DIR}/error-sites/404.html` - default html page for 404 (Not Found) error; you can copy `./templates/config/error-site/404.hyml` file
-  * `${NGINX_CONF_DIR}/error-sites/403.html` - default html page for 403 (Access Denied) error; you can copy `./templates/config/error-site/403.hyml` file
-  * `${NGINX_CONF_DIR}/sites-enabled/*.conf` - configuration files for enabled sites; you can use templates in `./templates/config/sites/enabled/*.conf.tmpl` files
+  * `${NGINX_CONF_DIR}/error-sites/404.html` - default html page for 404 (Not Found) error; you can copy `./templates/config/error-sites/404.hyml` file
+  * `${NGINX_CONF_DIR}/error-sites/403.html` - default html page for 403 (Access Denied) error; you can copy `./templates/config/error-sites/403.hyml` file
+  * `${NGINX_CONF_DIR}/sites/*.conf` - configuration files for enabled sites; you can use templates in `./templates/config/sites/*.conf.tmpl` files
 
 
 ## Default site

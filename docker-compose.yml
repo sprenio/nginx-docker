@@ -12,7 +12,8 @@ services:
     restart: always
     working_dir: /etc/nginx
     volumes:
-      - ${NGINX_CONF_DIR:-./config}/error-sites/prod:/etc/nginx/error-sites
+      - ${NGINX_CONF_DIR:-./config}/error-sites:/etc/nginx/error-sites
+      - ${NGINX_CONF_DIR:-./config}/sites:/etc/nginx/sites
       - ${NGINX_CONF_DIR:-./config}/nginx.conf:/etc/nginx/nginx.conf
       - ${NGINX_CONF_DIR:-./config}/default_server.conf:/etc/nginx/default_server.conf
       - ${NGINX_CONF_DIR:-./config}/snippets/phalconapp.conf:/etc/nginx/snippets/phalconapp.conf
