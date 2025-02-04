@@ -36,7 +36,7 @@ fi
 
 MAIN_DOMAIN=$(echo $DOMAINS | cut -d ',' -f 1);
 echo "renew certbot for ${MAIN_DOMAIN}"
-/usr/bin/certbot certonly -n --agree-tos --webroot -w ${CERT_CHALLENGE_DIR} -d ${DOMAINS} -m ${ACCOUNT}
+sudo /usr/bin/certbot certonly -n --agree-tos --webroot -w ${CERT_CHALLENGE_DIR} -d ${DOMAINS} -m ${ACCOUNT}
 
 F=$(readlink -f /etc/letsencrypt/live/${MAIN_DOMAIN}/fullchain.pem)
 
@@ -44,8 +44,8 @@ P=$(readlink -f /etc/letsencrypt/live/${MAIN_DOMAIN}/privkey.pem)
 
 SSL_DOMAIN_DIR="${SSL_CERTIFICATES_DIR}/${MAIN_DOMAIN}"
 if [[ ! -d  "${SSL_DOMAIN_DIR}" ]];then
-  mkdir -p "${SSL_DOMAIN_DIR}"
+  sudo mkdir -p "${SSL_DOMAIN_DIR}"
 fi
 
-cp $F ${SSL_DOMAIN_DIR}/fullchain.pem
-cp $P ${SSL_DOMAIN_DIR}/privkey.pem
+sudo cp $F ${SSL_DOMAIN_DIR}/fullchain.pem
+sudo cp $P ${SSL_DOMAIN_DIR}/privkey.pem
