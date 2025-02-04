@@ -3,11 +3,18 @@ server {
     listen 80;
     listen [::]:80;
 
-    server_name   www.{YOUR_DOMAIN} {YOUR_DOMAIN}
-                  www.{YOUR_OTHER_DOMAIN} {YOUR_OTHER_DOMAIN}
+    server_name   {YOUR_DOMAIN} *.{YOUR_DOMAIN}
+                  {YOUR_OTHER_DOMAIN} *.{YOUR_OTHER_DOMAIN};
 
-    if ($http_host !~ "^www\."){
-        return         301 https://www.$http_host$request_uri;
+    root /var/www/cert_challenge;
+
+    location / {
+        if (-f $request_filename){
+            break;
+        }
+        if ($http_host !~ "^www\."){
+            return 301 https://www.$http_host$request_uri;
+        }
+        return 301 https://$http_host$request_uri;
     }
-    return         301 https://$http_host$request_uri;
 }

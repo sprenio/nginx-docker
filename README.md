@@ -23,4 +23,7 @@ docker compose up
   ```bash
   nginx -s reload
   ```
-  
+* create  Let’s Encrypt certificate:  Execute the following command, replacing YOUR@EMAIL.ARDRESS with your email address, MAIN_DOMAIN with your domain and SUBDOMAIN with each subdomain for which you want to create a certificate:
+  ```bash
+  ./bin/createCert.sh -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -a YOUR@EMAIL.ARDRESS
+  ```
