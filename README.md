@@ -15,7 +15,7 @@
 
 ## Start Docker compose
 ```bash
-docker compose up
+sudo docker-compose up -V -d
 ```
 
 ## Others
@@ -26,4 +26,8 @@ docker compose up
 * create  Let’s Encrypt certificate:  Execute the following command, replacing YOUR@EMAIL.ARDRESS with your email address, MAIN_DOMAIN with your domain and SUBDOMAIN with each subdomain for which you want to create a certificate:
   ```bash
   ./bin/createCert.sh -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -a YOUR@EMAIL.ARDRESS
+  ```
+* Stop Docker Compose
+  ```bash
+  sudo docker-compose down --remove-orphans -v
   ```

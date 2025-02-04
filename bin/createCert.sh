@@ -4,7 +4,7 @@ APP_ROOT_DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; cd ../ ; pwd -P )
 ENV_FILE_PATH=${APP_ROOT_DIR}/.env
 
 if [[ -f ${ENV_FILE_PATH} ]]; then
-  export $(grep -v '^#' ${ENV_FILE_PATH} | xargs -d '\n')
+  export $(grep -v '^#' ${ENV_FILE_PATH} | xargs -d '\n' | tr -d "'")
 else
  echo "env file ${ENV_FILE_PATH} doesn't exist, using default values:"
  CERT_CHALLENGE_DIR=${APP_ROOT_DIR}/cert_challenge
