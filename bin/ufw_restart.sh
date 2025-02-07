@@ -7,9 +7,19 @@ ufw allow ssh
 ufw allow http
 ufw allow https
 
+
+NETWORK_HASH=$(sudo docker network ls | grep bridge | grep nginx-network | awk '{print $1;}')
+echo "Network hash: ${NETWORK_HASH}"
+if [[ -n "${NETWORK_HASH}" ]]; then
+  NETWORK_INTERFACE=$(sudo ifconfig | grep "${NETWORK_HASH}" | awk '{print $1;}')
+  echo "Network interface: ${NETWORK_INTERFACE}"
+  if [[ -n "${NETWORK_INTERFACE}" ]]; then
+    ufw allow in on ${NETWORK_INTERFACE}
+  fi
+
 #ufw allow in on docker0
 #ufw allow out on docker0
-ufw allow in on br-d5020c9aed29
+#ufw allow in on br-d5020c9aed29
 #ufw allow out on br-d5020c9aed29
 #ufw allow in on br-d7c9e2daebd8
 #ufw allow out on br-d7c9e2daebd8
