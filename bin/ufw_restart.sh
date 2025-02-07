@@ -16,6 +16,7 @@ if [[ -n "${NETWORK_HASH}" ]]; then
   if [[ -n "${NETWORK_INTERFACE}" ]]; then
     ufw allow in on ${NETWORK_INTERFACE}
   fi
+fi
 
 #ufw allow in on docker0
 #ufw allow out on docker0
