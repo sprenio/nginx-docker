@@ -6,6 +6,8 @@ services:
     container_name: nginx
     image: nginx:1.25.4
     hostname: nginx
+    networks:
+      - nginx-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
@@ -25,3 +27,5 @@ services:
       - ${CERT_CHALLENGE_DIR:-./cert_challenge}:/var/www/cert_challenge:ro
       - ${SSL_CERTIFICATES_DIR:-./ssl_certificates}:/var/www/ssl_certificates:ro
       - ${NGINX_LOGS_DIR:-../logs/nginx}:/var/log/nginx
+networks:
+  nginx-network:
