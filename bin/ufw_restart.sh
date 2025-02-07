@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ufw reset
 ufw default deny incoming
