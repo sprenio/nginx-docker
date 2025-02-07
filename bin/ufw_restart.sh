@@ -19,14 +19,6 @@ if [[ -n "${NETWORK_HASH}" ]]; then
   fi
 fi
 
-#ufw allow in on docker0
-#ufw allow out on docker0
-#ufw allow in on br-d5020c9aed29
-#ufw allow out on br-d5020c9aed29
-#ufw allow in on br-d7c9e2daebd8
-#ufw allow out on br-d7c9e2daebd8
-#ufw allow in on lo
-#ufw allow out on lo
 
 echo "y" | sudo ufw enable
 
