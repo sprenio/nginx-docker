@@ -40,12 +40,14 @@ if [[ -z "${DOMAINS}" || -z "${ACCOUNT}" ]]; then
 fi
 
 MAIN_DOMAIN=$(echo $DOMAINS | cut -d ',' -f 1);
+
+
+
+
+
 echo "renew certbot for ${MAIN_DOMAIN}"
 LIVE_DIR=/etc/letsencrypt/live/${MAIN_DOMAIN}
-if [[ -f ${LIVE_DIR} ]]; then
-  echo "${LIVE_DIR} already exist. Moving to ${LIVE_DIR}.bak"
-  mv -f ${LIVE_DIR} ${LIVE_DIR}.bak
-fi
+
 /usr/bin/certbot certonly -n --agree-tos --webroot -w ${CERT_CHALLENGE_DIR} -d ${DOMAINS} -m ${ACCOUNT}
 
 F=$(readlink -f /etc/letsencrypt/live/${MAIN_DOMAIN}/fullchain.pem)

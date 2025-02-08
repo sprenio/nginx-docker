@@ -27,5 +27,6 @@ services:
       - ${CERT_CHALLENGE_DIR:-./cert_challenge}:/var/www/cert_challenge:ro
       - ${SSL_CERTIFICATES_DIR:-./ssl_certificates}:/var/www/ssl_certificates:ro
       - ${NGINX_LOGS_DIR:-./logs}:/var/log/nginx
+      - /etc/letsencrypt/live:/etc/letsencrypt/live
 networks:
   nginx-network:
