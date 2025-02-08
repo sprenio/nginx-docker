@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $EUID -ne 0 ]]; then
+  echo -e "Permission denied: This script requires root privileges.\nPlease run it with 'sudo' or as the root user." >&2
+  exit 1
+fi
+
 APP_ROOT_DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; cd ../ ; pwd -P )
 ENV_FILE_PATH=${APP_ROOT_DIR}/.env
 
@@ -41,16 +46,16 @@ if [[ -f ${LIVE_DIR} ]]; then
   echo "${LIVE_DIR} already exist. Moving to ${LIVE_DIR}.bak"
   mv -f ${LIVE_DIR} ${LIVE_DIR}.bak
 fi
-sudo /usr/bin/certbot certonly -n --agree-tos --webroot -w ${CERT_CHALLENGE_DIR} -d ${DOMAINS} -m ${ACCOUNT}
+/usr/bin/certbot certonly -n --agree-tos --webroot -w ${CERT_CHALLENGE_DIR} -d ${DOMAINS} -m ${ACCOUNT}
 
-F=$(sudo readlink -f /etc/letsencrypt/live/${MAIN_DOMAIN}/fullchain.pem)
+F=$(readlink -f /etc/letsencrypt/live/${MAIN_DOMAIN}/fullchain.pem)
 
-P=$(sudo readlink -f /etc/letsencrypt/live/${MAIN_DOMAIN}/privkey.pem)
+P=$(readlink -f /etc/letsencrypt/live/${MAIN_DOMAIN}/privkey.pem)
 
 SSL_DOMAIN_DIR="${SSL_CERTIFICATES_DIR}/${MAIN_DOMAIN}"
 if [[ ! -d  "${SSL_DOMAIN_DIR}" ]];then
-  sudo mkdir -p "${SSL_DOMAIN_DIR}"
+  mkdir -p "${SSL_DOMAIN_DIR}"
 fi
 
-sudo cp $F ${SSL_DOMAIN_DIR}/fullchain.pem
-sudo cp $P ${SSL_DOMAIN_DIR}/privkey.pem
+cp $F ${SSL_DOMAIN_DIR}/fullchain.pem
+cp $P ${SSL_DOMAIN_DIR}/privkey.pem
