@@ -154,11 +154,14 @@ if (is_link($certPath)) {
 } else if (file_exists($certPath)) {
     rename($certPath, $certPath . '.bak');
 }
-symlink($info['Certificate Path'], $certPath);
+$targetCertPath = realpath(readlink($info['Certificate Path']));
+$targetKeyPath = realpath(readlink($info['Private Key Path']));
+
+symlink($targetCertPath, $certPath);
 if (is_link($keyPath)) {
     unlink($keyPath);
 } else if (file_exists($keyPath)) {
     rename($keyPath, $keyPath . '.bak');
 }
-symlink($info['Private Key Path'], $keyPath);
+symlink($targetKeyPath, $keyPath);
 echo PHP_EOL;
