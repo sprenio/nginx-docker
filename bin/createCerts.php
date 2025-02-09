@@ -154,8 +154,9 @@ if (is_link($certPath)) {
 } else if (file_exists($certPath)) {
     rename($certPath, $certPath . '.bak');
 }
-$targetCertPath = realpath(readlink($info['Certificate Path']));
-$targetKeyPath = realpath(readlink($info['Private Key Path']));
+
+$targetCertPath = preg_replace('/^\\W*archive/','/etc/letsencrypt/archive/', readlink($info['Certificate Path']));
+$targetKeyPath = preg_replace('/^\\W*archive/','/etc/letsencrypt/archive/', readlink($info['Private Key Path']));
 
 symlink($targetCertPath, $certPath);
 if (is_link($keyPath)) {
