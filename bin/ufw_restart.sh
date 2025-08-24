@@ -8,16 +8,16 @@ ufw allow http
 ufw allow https
 
 
-NETWORK_HASH=$(sudo docker network ls | grep bridge | grep nginx-network | awk '{print $1;}')
-echo "Network hash: ${NETWORK_HASH}"
-if [[ -n "${NETWORK_HASH}" ]]; then
-  NETWORK_INTERFACE=$(sudo ifconfig | grep "${NETWORK_HASH}" | awk '{print $1;}')
-  NETWORK_INTERFACE=${NETWORK_INTERFACE::-1}
-  echo "Network interface: ${NETWORK_INTERFACE}"
-  if [[ -n "${NETWORK_INTERFACE}" ]]; then
-    ufw allow in on ${NETWORK_INTERFACE}
-  fi
-fi
+#NETWORK_HASH=$(sudo docker network ls | grep bridge | grep nginx-network | awk '{print $1;}')
+#echo "Network hash: ${NETWORK_HASH}"
+#if [[ -n "${NETWORK_HASH}" ]]; then
+#  NETWORK_INTERFACE=$(sudo ifconfig | grep "${NETWORK_HASH}" | awk '{print $1;}')
+#  NETWORK_INTERFACE=${NETWORK_INTERFACE::-1}
+#  echo "Network interface: ${NETWORK_INTERFACE}"
+#  if [[ -n "${NETWORK_INTERFACE}" ]]; then
+#    ufw allow in on ${NETWORK_INTERFACE}
+#  fi
+#fi
 
 
 echo "y" | sudo ufw enable

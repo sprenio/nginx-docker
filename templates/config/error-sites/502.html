@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 Not Found</title>
+    <title>502 Bad Gateway</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
@@ -14,8 +14,8 @@
             justify-content: center;
             align-items: center;
             font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-            color: #333;
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: #fff;
         }
 
         .container {
@@ -26,13 +26,11 @@
         h1 {
             font-size: 8rem;
             margin: 0;
-            color: #fff;
-            animation: bounce 1s infinite;
+            animation: glitch 1s infinite;
         }
 
         p {
             font-size: 1.5rem;
-            color: #fff;
             margin: 20px 0;
         }
 
@@ -50,21 +48,26 @@
             background: rgba(0,0,0,0.4);
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-5px, 5px); }
+            40% { transform: translate(5px, -5px); }
+            60% { transform: translate(-5px, 5px); }
+            80% { transform: translate(5px, -5px); }
+            100% { transform: translate(0); }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>404</h1>
-    <p>Oops! Looks like this page doesn’t exist.</p>
+    <h1>502</h1>
+    <p>Bad Gateway – The server received an invalid response.</p>
+    <p>Please try again later or contact the administrator.</p>
     <!-- a href="/">Go Back Home</a -->
 </div>
 </body>

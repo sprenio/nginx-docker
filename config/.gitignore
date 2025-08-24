@@ -1,9 +1,5 @@
-# Ignore everything in this directory
-*
-# Except this file
-!.gitignore
-!error-sites
-!sites
-!snippets
-
+# Ignore conf files in this directory
+*.conf
+# Except the local configs
+!*.local.conf
 
