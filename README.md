@@ -97,7 +97,7 @@ sudo docker-compose up -V -d
   ```bash
   docker exec nginx nginx -s reload
   ```
- * **Stop Docker Compose**
+* **Stop Docker Compose**
   ```bash
   docker-compose down --remove-orphans -v
   ```
