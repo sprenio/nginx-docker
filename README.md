@@ -45,6 +45,8 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
 - Nginx routes requests to the right container using **Docker network** (`reverse-proxy`) and `server_name`.
 - Static files can be served directly from the Nginx container if volume-mounted.
 
+---
+
 ## Setup
 
 1. **Create Docker network**
@@ -69,25 +71,31 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
     * `${NGINX_CONF_DIR}/error-sites/503.html` — default html page for 503 (Service Unavailable) error; you can copy `./templates/config/error-sites/503.html` file
     * `${NGINX_CONF_DIR}/error-sites/504.html` — default html page for 504 (Gateway Timeout) error; you can copy `./templates/config/error-sites/504.html` file
 
+---
+
 ## PHPMyAdmin
 * Accessible through Nginx reverse proxy (no ports exposed externally).
 * Edit `${PHPMYADMIN_CONF_DIR}/config.user.inc.php` for custom servers, users, and auth type.
+
+---
 
 ## Start Docker compose
 ```bash
 sudo docker-compose up -V -d
 ```
+
+---
 ## Other commands
 * **Reload Nginx**
   ```bash
-  sudo docker exec nginx nginx -s reload
+  docker exec nginx nginx -s reload
+  ```
+ * **Stop Docker Compose**
+  ```bash
+  docker-compose down --remove-orphans -v
   ```
 * **Create Let’s Encrypt certificate:** Execute the following command, replacing YOUR@EMAIL.ARDRESS with your email address, MAIN_DOMAIN with your domain, and SUBDOMAIN with each subdomain for which you want to create a certificate:
   ```bash
   ./bin/createCerts.php -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -a YOUR@EMAIL.ARDRESS
   ```
-* **Stop Docker Compose**
-  ```bash
-  sudo docker-compose down --remove-orphans -v
-  ```
-  
+---
