@@ -1,5 +1,12 @@
 # Nginx-Docker
 
+* [Overview](#overview)
+* [Setup](#setup)
+* [PHPMyAdmin](#phpmyadmin)
+* [Start Docker Compose](#start-docker-compose)
+* [Other commands](#other-commands)
+
+
 ## Overview
 
 This setup provides a **reverse proxy layer** on top of your other Docker containers. Its main responsibilities are:
@@ -94,7 +101,8 @@ sudo docker-compose up -V -d
   ```bash
   docker-compose down --remove-orphans -v
   ```
-* **Create Let’s Encrypt certificate:** Execute the following command, replacing YOUR@EMAIL.ARDRESS with your email address, MAIN_DOMAIN with your domain, and SUBDOMAIN with each subdomain for which you want to create a certificate:
+* **Create Let’s Encrypt certificate:**  
+  Execute the following command, replacing YOUR@EMAIL.ARDRESS with your email address, MAIN_DOMAIN with your domain, and SUBDOMAIN with each subdomain for which you want to create a certificate:
   ```bash
   ./bin/createCerts.php -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -a YOUR@EMAIL.ARDRESS
   ```
