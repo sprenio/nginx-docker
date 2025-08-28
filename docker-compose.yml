@@ -28,8 +28,6 @@ services:
       - ${WWW_DEFAULT_SRC_DIR:-./src/default}:/var/www/src/default
       - ${WWW_STATIC_SRC_DIR:-./src/static}:/var/www/src/static
       - ${WWW_PHP_FPM_SRC_DIR:-./src/php-fpm}:/var/www/src/php-fpm
-      - ${CERT_CHALLENGE_DIR:-./cert_challenge}:/var/www/cert_challenge:ro
-      - ${SSL_CERTIFICATES_DIR:-./ssl_certificates}:/var/www/ssl_certificates:ro
       - ${NGINX_LOGS_DIR:-./logs}:/var/log/nginx
       - phpmyadmin-src-volume:/var/www/phpmyadmin:ro
       # certyfikaty i klucze (bind mount do hosta)
