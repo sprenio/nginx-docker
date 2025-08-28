@@ -4,6 +4,11 @@
 * [Setup](#setup)
 * [PHPMyAdmin](#phpmyadmin)
 * [Start Docker Compose](#start-docker-compose)
+* [Certbot](#certbot)
+  * [Create a new certificate](#create-a-new-certificate)
+  * [Renew all existing certificates](#renew-all-existing-certificates)
+  * [Automatic daily renewal (cron)](#automatic-daily-renewal-cron)
+  * [Logs](#logs)
 * [Other commands](#other-commands)
 
 
@@ -67,6 +72,7 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
     * `${NGINX_CONF_DIR}/nginx.conf` — nginx configuration; you can copy `./templates/config/nginx.conf` file
     * `${NGINX_CONF_DIR}/sites/*.conf` — configuration files for enabled sites; you can use templates in `./templates/config/sites/*.conf` files
     * `${PHPMYADMIN_CONF_DIR}/config.user.inc.php` — **PHPMyAdmin** — template config in `./templates/config/phpmyadmin/config.user.inc.php`
+   > to copy all default configuration files, run `cp templates/config/*.conf config/` 
 4. **Error pages**
     * `${NGINX_CONF_DIR}/error-sites/400.html` — default html page for 400 (Bad Request) error; you can copy `./templates/config/error-sites/400.html` file
     * `${NGINX_CONF_DIR}/error-sites/401.html` — default html page for 401 (Unauthorized) error; you can copy `./templates/config/error-sites/401.html` file
@@ -77,6 +83,7 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
     * `${NGINX_CONF_DIR}/error-sites/502.html` — default html page for 502 (Bad Gateway) error; you can copy `./templates/config/error-sites/502.html` file
     * `${NGINX_CONF_DIR}/error-sites/503.html` — default html page for 503 (Service Unavailable) error; you can copy `./templates/config/error-sites/503.html` file
     * `${NGINX_CONF_DIR}/error-sites/504.html` — default html page for 504 (Gateway Timeout) error; you can copy `./templates/config/error-sites/504.html` file
+    > to copy all default error pages, run `cp ./templates/config/error-sites/*.html ./config/error-sites/`
 
 ---
 
@@ -88,7 +95,30 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
 
 ## Start Docker compose
 ```bash
-sudo docker-compose up -V -d
+docker compose up -V -d
+```
+
+## Certbot
+### Create a new certificate
+Run the script with a comma-separated list of domains and an email address for notifications:
+```bash
+./bin/certbot_docker.sh -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -e my@email.com
+````
+
+### Renew all existing certificates
+Renew all existing certificates in the project:
+```bash
+./bin/certbot_docker.sh -e my@email.com -r
+```
+### Automatic daily renewal (cron)
+Add the following line to your crontab to automatically renew certificates and reload Nginx daily at 03:00:
+```
+0 3 * * * /path/to/project/bin/certbot_docker.sh -e my@email.com -r
+```
+### Logs
+Each run of the script generates a log file in `./logs/`, for example:
+```bash
+./logs/certbot_20250828_101500.log
 ```
 
 ---
@@ -99,7 +129,7 @@ sudo docker-compose up -V -d
   ```
 * **Stop Docker Compose**
   ```bash
-  docker-compose down --remove-orphans -v
+  docker compose down --remove-orphans -v
   ```
 * **Create Let’s Encrypt certificate:**  
   Execute the following command, replacing YOUR@EMAIL.ARDRESS with your email address, MAIN_DOMAIN with your domain, and SUBDOMAIN with each subdomain for which you want to create a certificate:

@@ -4,7 +4,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: nginx:1.25.4
+    image: nginx:1.28.0
     hostname: nginx
     networks:
       - reverse-proxy
@@ -12,7 +12,7 @@ services:
       - "host.docker.internal:host-gateway"
     ports:
       - "${HTTP_PORT:-80}:80"
-#      - "${HTTPS_PORT:-443}:443" # Comment this out for internal calls when SSL encryption is enabled in the external layer
+      - "${HTTPS_PORT:-443}:443" # Comment this out for internal calls when SSL encryption is enabled in the external layer
     restart: always
     working_dir: /etc/nginx
     volumes:
@@ -32,7 +32,10 @@ services:
       - ${SSL_CERTIFICATES_DIR:-./ssl_certificates}:/var/www/ssl_certificates:ro
       - ${NGINX_LOGS_DIR:-./logs}:/var/log/nginx
       - phpmyadmin-src-volume:/var/www/phpmyadmin:ro
-      #- /etc/letsencrypt/archive:/etc/letsencrypt/archive
+      # certyfikaty i klucze (bind mount do hosta)
+      - ${LETSENCRYPT_DIR:-./letsencrypt/etc}:/etc/letsencrypt:ro
+      # katalog dla challenge (wspólny z certbotem)
+      - ${CHALLENGE_DIR:-./letsencrypt/data}:/var/www/certbot:ro
 
   phpmyadmin:
     container_name: phpmyadmin
@@ -46,6 +49,7 @@ services:
 
 volumes:
   phpmyadmin-src-volume:
+  letsencrypt-var:    # wolumen pomocniczy certbota
 
 networks:
   reverse-proxy:
