@@ -6,8 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Domyślne ścieżki
-DEFAULT_LETSENCRYPT_DIR="$PROJECT_DIR/letsencrypt"
-DEFAULT_CHALLENGE_DIR="$PROJECT_DIR/data/letsencrypt"
+DEFAULT_LETSENCRYPT_DIR="$PROJECT_DIR/letsencrypt/etc"
+DEFAULT_CHALLENGE_DIR="$PROJECT_DIR/letsencrypt/data"
 LOG_DIR="$PROJECT_DIR/logs"
 
 # Wczytanie .env, jeśli istnieje w katalogu projektu
