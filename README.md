@@ -113,6 +113,7 @@ This project supports two alternative methods of generating and renewing TLS/SSL
 Choose the one that best fits your setup.
 
 ### 1. Certbot (HTTP-01 validation)
+See [Let's Encrypt documentation](https://letsencrypt.org/docs/) for more details.  
 **Use when:**
 - Your server is directly accessible on port `80` (no CDN/proxy in front, or you can temporarily disable it).
 - You want a simple, script-based approach to generate certificates inside Docker.
@@ -139,6 +140,7 @@ Each run of the script generates a log file in `./logs/`, for example:
 ```
 
 ### 2. acme.sh (DNS-01 validation)
+Certificates are obtained via DNS challenges.  
 **Use when:**
 - Your domain is behind a CDN/proxy (e.g. Cloudflare orange cloud).
 - You don't want to expose port 80 at all.
@@ -150,6 +152,16 @@ curl https://get.acme.sh | sh
 export PATH="~/.acme.sh:$PATH"
 acme.sh --version
 ```
+#### Switch to **Let's Encrypt** as the default CA (recommended):
+```bash
+~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+```
+> ℹ️ By default, acme.sh uses ZeroSSL.  
+> If you prefer ZeroSSL, register an account once with:
+> ```bash
+> ~/.acme.sh/acme.sh --register-account -m your@email.com
+> ```
+> 
 #### Example: Cloudflare
 1. Create an API token in Cloudflare (scope: **DNS Edit** for the domain).
 2. Then add the following environment variables to `~/.acme.sh/acme.sh.env`:
@@ -187,8 +199,8 @@ acme.sh --version
 #### Install certificate for Nginx
 ```bash
 acme.sh --install-cert -d www.MAIN_DOMAIN \
---key-file {path_to_ssl_private}/www.MAIN_DOMAIN.key \
---fullchain-file {path_to_ssl_certs}/www.MAIN_DOMAIN.crt \
+--key-file {path_to_ssl}/www.MAIN_DOMAIN.key \
+--fullchain-file {path_to_ssl}/www.MAIN_DOMAIN.crt \
 --reloadcmd "docker exec nginx nginx -s reload"
 ```
 
