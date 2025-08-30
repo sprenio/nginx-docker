@@ -92,7 +92,8 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
     * `${NGINX_CONF_DIR}/error-sites/503.html` — default html page for 503 (Service Unavailable) error; you can copy `./templates/config/error-sites/503.html` file
     * `${NGINX_CONF_DIR}/error-sites/504.html` — default html page for 504 (Gateway Timeout) error; you can copy `./templates/config/error-sites/504.html` file
     > to copy all default error pages, run `cp ./templates/config/error-sites/*.html ./config/error-sites/`
-
+5. **Whitelist emila fo oauth2**
+   * `${OAUTH2_DIR}/authorized_emails.txt` - create this file and add your email address, you can use template in `./templates/oauth2/authorized_emails.txt` files
 ---
 
 ## 🗄️ PHPMyAdmin
@@ -151,11 +152,15 @@ acme.sh --version
 ```
 #### Example: Cloudflare
 1. Create an API token in Cloudflare (scope: **DNS Edit** for the domain).
-2. Then export the variables:
+2. Then add the following environment variables to `~/.acme.sh/acme.sh.env`:
    ```bash
    export CF_Token="your_cloudflare_api_token"
    export CF_Account_ID="your_cloudflare_account_id"
    ```
+   > ⚠️ Make sure the file is protected:
+   > ```shell
+   > chmod 600 ~/.acme.sh/acme.sh.env
+   > ```
 3. Issue certificate
    ```bash
    acme.sh --issue --dns dns_cf -d www.MAIN_DOMAIN -d MAIN_DOMAIN -d www.SUBDOMAIN.MAIN_DOMAIN -d SUBDOMAIN.MAIN_DOMAIN
@@ -165,12 +170,16 @@ acme.sh --version
    - GET /domain/zone/*
    - POST /domain/zone/*
    - DELETE /domain/zone/*
-2. Export environment variables:
+2. Add the following environment variables to `~/.acme.sh/acme.sh.env`:
    ```bash
    export OVH_AK="ApplicationKey"
    export OVH_AS="ApplicationSecret"
    export OVH_CK="ConsumerKey"
    ```
+   > ⚠️ Make sure the file is protected:
+   > ```shell
+   > chmod 600 ~/.acme.sh/acme.sh.env
+   > ```
 3. Issue certificate:
    ```bash
    acme.sh --issue --dns dns_ovh -d www.MAIN_DOMAIN -d MAIN_DOMAIN -d www.SUBDOMAIN.MAIN_DOMAIN -d SUBDOMAIN.MAIN_DOMAIN
