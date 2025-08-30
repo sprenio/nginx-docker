@@ -61,16 +61,6 @@ if [[ "$PLUGIN" != "ovh" && "$PLUGIN" != "cf" ]]; then
     error_exit "Plugin must be 'ovh' or 'cf'"
 fi
 
-ACME_ENV="$HOME/.acme.sh/acme.sh.env"
-if [[ -f "$ACME_ENV" ]]; then
-    log "Loading acme.sh environment from $ACME_ENV"
-    # Źródłowanie pliku, aby zmienne OVH/CF były dostępne
-    # shellcheck source=/dev/null
-    source "$ACME_ENV"
-else
-    log "[WARNING] acme.sh environment file not found at $ACME_ENV"
-fi
-
 # Katalog SSL
 SSL_DIR="${SSL_CERTS_DIR:-$DEFAULT_SSL_DIR}"
 BACKUP_DIR="${SSL_DIR}/backup_$(date +%Y%m%d_%H%M%S)"
