@@ -1,0 +1,79 @@
+name: "nginx"
+
+services:
+
+  nginx:
+    container_name: nginx
+    image: nginx:1.28.0
+    hostname: nginx
+    networks:
+      - reverse-proxy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443" # Comment this out for internal calls when SSL encryption is enabled in the external layer
+    restart: unless-stopped
+    working_dir: /etc/nginx
+    volumes:
+      - ${NGINX_CONF_DIR:-./config}/error-sites:/etc/nginx/error-sites
+      - ${NGINX_CONF_DIR:-./config}/sites:/etc/nginx/sites
+      - ${NGINX_CONF_DIR:-./config}/nginx.conf:/etc/nginx/nginx.conf
+      - ${NGINX_CONF_DIR:-./config}/default_server.conf:/etc/nginx/default_server.conf
+      - ${NGINX_CONF_DIR:-./config}/snippets/error-pages.conf:/etc/nginx/snippets/error-pages.conf
+      - ${NGINX_CONF_DIR:-./config}/snippets/http-def.conf:/etc/nginx/snippets/http-def.conf
+      - ${NGINX_CONF_DIR:-./config}/snippets/https-def.conf:/etc/nginx/snippets/https-def.conf
+      - ${NGINX_CONF_DIR:-./config}/snippets/php-fpm.conf:/etc/nginx/snippets/php-fpm.conf
+      - ${NGINX_CONF_DIR:-./config}/snippets/static-files.conf:/etc/nginx/snippets/static-files.conf
+      - ${WWW_DEFAULT_SRC_DIR:-./src/default}:/var/www/src/default
+      - ${WWW_STATIC_SRC_DIR:-./src/static}:/var/www/src/static
+      - ${WWW_PHP_FPM_SRC_DIR:-./src/php-fpm}:/var/www/src/php-fpm
+      - ${NGINX_LOGS_DIR:-./logs}:/var/log/nginx
+      - phpmyadmin-src-volume:/var/www/phpmyadmin:ro
+
+      # Odkomentuj poniższe jeśli chcesz instalować certyfikaty ssl przez certbota
+      # - ${LETSENCRYPT_DIR:-./letsencrypt/etc}:/etc/letsencrypt:ro # certyfikaty i klucze (bind mount do hosta)
+      # - ${CHALLENGE_DIR:-./letsencrypt/data}:/var/www/certbot:ro  # katalog dla challenge (wspólny z certbotem)
+      # Odkomentuj poniższe jeśli chcesz instalować certyfikaty przez acme.sh
+      # - ${SSL_CERTS_DIR:-./ssl}:/etc/ssl/certs:ro
+
+    # command: ["tail", "-f", "/dev/null"] # odkomentuj do debugowania
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin:5.2-fpm
+    restart: unless-stopped
+    networks:
+      - reverse-proxy
+    volumes:
+      - phpmyadmin-src-volume:/var/www/html
+      - ${PHPMYADMIN_CONF_DIR:-./config/phpmyadmin}/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    container_name: dbadmin-oauth2
+    env_file: .env
+    environment:
+      OAUTH2_PROXY_PROVIDER: google
+      OAUTH2_PROXY_COOKIE_SECURE: "true"     # USTAW "true" gdy masz HTTPS!
+      OAUTH2_PROXY_COOKIE_SAMESITE: lax
+      OAUTH2_PROXY_EMAIL_DOMAINS: "*"         # pozwól logować się dowolnym kontom Google...
+      OAUTH2_PROXY_AUTHENTICATED_EMAILS_FILE: /etc/oauth2-proxy/authorized_emails.txt  # ...ale tylko z tej listy wejdą dalej
+      OAUTH2_PROXY_UPSTREAMS: "file:///dev/null"   # niczego nie proxujemy przez oauth2-proxy, używamy go tylko do auth_request
+      OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
+      OAUTH2_PROXY_REVERSE_PROXY: "true"
+      # Poniższe trzy MUSZĄ być ustawione (w .env):
+      # OAUTH2_PROXY_CLIENT_ID
+      # OAUTH2_PROXY_CLIENT_SECRET
+      # OAUTH2_PROXY_COOKIE_SECRET
+      # + OAUTH2_PROXY_REDIRECT_URL
+    volumes:
+      - ${OAUTH2_DIR:-./oauth2}/authorized_emails.txt:/etc/oauth2-proxy/authorized_emails.txt:ro
+    restart: unless-stopped
+
+volumes:
+  phpmyadmin-src-volume:
+  letsencrypt-var:    # wolumen pomocniczy certbota
+
+networks:
+  reverse-proxy:
+    external: true
