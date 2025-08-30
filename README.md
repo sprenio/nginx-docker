@@ -94,6 +94,9 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
     > to copy all default error pages, run `cp ./templates/config/error-sites/*.html ./config/error-sites/`
 5. **Whitelist emila fo oauth2**
    * `${OAUTH2_DIR}/authorized_emails.txt` - create this file and add your email address, you can use template in `./templates/oauth2/authorized_emails.txt` files
+6. **docker-compose configuration**
+    * Create docker-compose.yaml file, you can copy `template/docker-compose.yaml`
+   > to copy a default configuration file, run `cp ./templates/docker-compose.yaml ./docker-compose.yaml`
 ---
 
 ## 🗄️ PHPMyAdmin
