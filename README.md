@@ -1,18 +1,26 @@
 # Nginx-Docker
 
-* [Overview](#overview)
-* [Setup](#setup)
-* [PHPMyAdmin](#phpmyadmin)
-* [Start Docker Compose](#start-docker-compose)
-* [Certbot](#certbot)
-  * [Create a new certificate](#create-a-new-certificate)
-  * [Renew all existing certificates](#renew-all-existing-certificates)
-  * [Automatic daily renewal (cron)](#automatic-daily-renewal-cron)
-  * [Logs](#logs)
-* [Other commands](#other-commands)
+* [Overview](#-overview)
+* [Setup](#-setup)
+* [PHPMyAdmin](#-phpmyadmin)
+* [Start Docker Compose](#-start-docker-compose)
+* [TLS/SSL Certificates](#-tlsssl-certificates)
+  * [Certbot](#1-certbot-http-01-validation)
+    * [Create a new certificate](#create-a-new-certificate)
+    * [Renew all existing certificates](#renew-all-existing-certificates)
+    * [Automatic daily renewal (cron)](#automatic-daily-renewal-cron)
+    * [Logs](#logs)
+  * [acme.sh (DNS-01 validation)](#2-acmesh-dns-01-validation)
+    * [Installation and verification](#installation-and-verification)
+    * [Example: Cloudflare](#example-cloudflare)
+    * [Example: OVH](#example-ovh)
+    * [Install certificate for Nginx](#install-certificate-for-nginx)
+    * [Automatic renewal](#automatic-renewal)
+  * [Summary](#-summary)
+* [Other commands](#-other-commands)
 
 
-## Overview
+## 📖 Overview
 
 This setup provides a **reverse proxy layer** on top of your other Docker containers. Its main responsibilities are:
 
@@ -59,7 +67,7 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
 
 ---
 
-## Setup
+## ⚙️ Setup
 
 1. **Create Docker network**
    ```bash
@@ -87,42 +95,106 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
 
 ---
 
-## PHPMyAdmin
+## 🗄️ PHPMyAdmin
 * Accessible through Nginx reverse proxy (no ports exposed externally).
 * Edit `${PHPMYADMIN_CONF_DIR}/config.user.inc.php` for custom servers, users, and auth type.
 
 ---
 
-## Start Docker compose
+## 🐳 Start Docker compose
 ```bash
 docker compose up -V -d
 ```
 
-## Certbot
-### Create a new certificate
+## 🔒 TLS/SSL Certificates
+
+This project supports two alternative methods of generating and renewing TLS/SSL certificates.  
+Choose the one that best fits your setup.
+
+### 1. Certbot (HTTP-01 validation)
+**Use when:**
+- Your server is directly accessible on port `80` (no CDN/proxy in front, or you can temporarily disable it).
+- You want a simple, script-based approach to generate certificates inside Docker.
+#### Create a new certificate
 Run the script with a comma-separated list of domains and an email address for notifications:
 ```bash
 ./bin/certbot_docker.sh -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -e my@email.com
 ````
 
-### Renew all existing certificates
+#### Renew all existing certificates
 Renew all existing certificates in the project:
 ```bash
 ./bin/certbot_docker.sh -e my@email.com -r
 ```
-### Automatic daily renewal (cron)
+#### Automatic daily renewal (cron)
 Add the following line to your crontab to automatically renew certificates and reload Nginx daily at 03:00:
 ```
 0 3 * * * /path/to/project/bin/certbot_docker.sh -e my@email.com -r
 ```
-### Logs
+#### Logs
 Each run of the script generates a log file in `./logs/`, for example:
 ```bash
 ./logs/certbot_20250828_101500.log
 ```
 
+### 2. acme.sh (DNS-01 validation)
+**Use when:**
+- Your domain is behind a CDN/proxy (e.g. Cloudflare orange cloud).
+- You don't want to expose port 80 at all.
+- You prefer fully automated issuance and renewal via DNS APIs.
+
+#### Installation and verification
+```bash
+curl https://get.acme.sh | sh
+export PATH="~/.acme.sh:$PATH"
+acme.sh --version
+```
+#### Example: Cloudflare
+1. Create an API token in Cloudflare (scope: **DNS Edit** for the domain).
+2. Then export the variables:
+   ```bash
+   export CF_Token="your_cloudflare_api_token"
+   export CF_Account_ID="your_cloudflare_account_id"
+   ```
+3. Issue certificate
+   ```bash
+   acme.sh --issue --dns dns_cf -d www.MAIN_DOMAIN -d MAIN_DOMAIN -d www.SUBDOMAIN.MAIN_DOMAIN -d SUBDOMAIN.MAIN_DOMAIN
+   ```
+#### Example: OVH
+1. **Create API credentials** at OVH API Console with DNS access:
+   - GET /domain/zone/*
+   - POST /domain/zone/*
+   - DELETE /domain/zone/*
+2. Export environment variables:
+   ```bash
+   export OVH_AK="ApplicationKey"
+   export OVH_AS="ApplicationSecret"
+   export OVH_CK="ConsumerKey"
+   ```
+3. Issue certificate:
+   ```bash
+   acme.sh --issue --dns dns_ovh -d www.MAIN_DOMAIN -d MAIN_DOMAIN -d www.SUBDOMAIN.MAIN_DOMAIN -d SUBDOMAIN.MAIN_DOMAIN
+   ```
+#### Install certificate for Nginx
+```bash
+acme.sh --install-cert -d MAIN_DOMAIN \
+--key-file {path_to_ssl_private}/www.MAIN_DOMAIN.key \
+--fullchain-file {path_to_ssl_certs}/www.MAIN_DOMAIN.crt \
+--reloadcmd "docker exec nginx nginx -s reload"
+```
+
+#### Automatic renewal
+- acme.sh automatically installs a cron job.
+- Certificates are renewed before expiry and Nginx is reloaded.
+- No manual cron entries are needed.
+
+### 👉 Summary:
+- Use **Certbot** if you control port `80` and want a Docker-based setup.
+- Use **acme.sh (DNS-01)** if your domain is proxied by a CDN (e.g. Cloudflare) or hosted at a provider with API support (e.g. OVH).
+
+
 ---
-## Other commands
+## 🔧 Other commands
 * **Reload Nginx**
   ```bash
   docker exec nginx nginx -s reload
@@ -131,7 +203,8 @@ Each run of the script generates a log file in `./logs/`, for example:
   ```bash
   docker compose down --remove-orphans -v
   ```
-* **Create Let’s Encrypt certificate:**  
+* **Create Let's Encrypt certificate:**
+##
   Execute the following command, replacing YOUR@EMAIL.ARDRESS with your email address, MAIN_DOMAIN with your domain, and SUBDOMAIN with each subdomain for which you want to create a certificate:
   ```bash
   ./bin/createCerts.php -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -a YOUR@EMAIL.ARDRESS
