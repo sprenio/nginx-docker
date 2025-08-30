@@ -95,7 +95,7 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
 5. **Whitelist emila fo oauth2**
    * `${OAUTH2_DIR}/authorized_emails.txt` - create this file and add your email address, you can use template in `./templates/oauth2/authorized_emails.txt` files
 6. **docker-compose configuration**
-    * Create docker-compose.yaml file, you can copy `template/docker-compose.yml`
+    * Create docker-compose.yaml file, you can copy `templates/docker-compose.yml`
    > to copy a default configuration file, run `cp ./templates/docker-compose.yml ./docker-compose.yml`
 ---
 
