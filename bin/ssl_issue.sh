@@ -6,6 +6,11 @@ set -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEFAULT_SSL_DIR="$(realpath "${SCRIPT_DIR}/../ssl")"
 
+ACME_SH_PATH=$(which acme.sh 2>/dev/null)
+if [[ -z "$ACME_SH_PATH" ]]; then
+    echo "[ERROR] acme.sh not found in PATH. Please install it or add to PATH."
+    exit 1
+fi
 
 usage() {
     echo "Usage: $0 -p <plugin_name> -d <comma-separated list of domains> [-d <another list> ...]"
@@ -89,7 +94,7 @@ for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
     done
 
     # Issue certyfikatu
-    ISSUE_CMD="acme.sh --issue --dns dns_${PLUGIN}"
+    ISSUE_CMD="${ACME_SH_PATH} --issue --dns dns_${PLUGIN}"
     for domain in "${DOMAINS[@]}"; do
         ISSUE_CMD+=" -d $domain"
     done
@@ -104,7 +109,7 @@ for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
     fi
 
     # Instalacja certyfikatu dla pierwszej domeny
-    INSTALL_CMD="acme.sh --install-cert -d ${PRIMARY_DOMAIN} \
+    INSTALL_CMD="${ACME_SH_PATH} --install-cert -d ${PRIMARY_DOMAIN} \
 --key-file ${SSL_DIR}/${PRIMARY_DOMAIN}.key \
 --fullchain-file ${SSL_DIR}/${PRIMARY_DOMAIN}.crt \
 --reloadcmd \"docker exec nginx nginx -s reload\""
