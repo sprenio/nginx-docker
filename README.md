@@ -142,7 +142,7 @@ Each run of the script generates a log file in `./logs/`, for example:
 ./logs/certbot_20250828_101500.log
 ```
 
-### 2. acme.sh (DNS-01 validation)
+### 2. acme.sh (DNS-01 validation via helper script)
 Certificates are obtained via DNS challenges.  
 **Use when:**
 - Your domain is behind a CDN/proxy (e.g. Cloudflare orange cloud).
@@ -176,10 +176,6 @@ acme.sh --version
    > ```shell
    > chmod 600 ~/.acme.sh/acme.sh.env
    > ```
-3. Issue certificate
-   ```bash
-   acme.sh --issue --dns dns_cf -d www.MAIN_DOMAIN -d MAIN_DOMAIN -d www.SUBDOMAIN.MAIN_DOMAIN -d SUBDOMAIN.MAIN_DOMAIN
-   ```
 #### Example: OVH
 1. **Create API credentials** at OVH API Console with DNS access:
    - GET /domain/zone/*
@@ -195,17 +191,38 @@ acme.sh --version
    > ```shell
    > chmod 600 ~/.acme.sh/acme.sh.env
    > ```
-3. Issue certificate:
-   ```bash
-   acme.sh --issue --dns dns_ovh -d www.MAIN_DOMAIN -d MAIN_DOMAIN -d www.SUBDOMAIN.MAIN_DOMAIN -d SUBDOMAIN.MAIN_DOMAIN
-   ```
+
 #### Install certificate for Nginx
-```bash
-acme.sh --install-cert -d www.MAIN_DOMAIN \
---key-file {path_to_ssl}/www.MAIN_DOMAIN.key \
---fullchain-file {path_to_ssl}/www.MAIN_DOMAIN.crt \
---reloadcmd "docker exec nginx nginx -s reload"
-```
+Install certificates using the helper script `ssl_issue.sh`.  
+This script simplifies issuing and installing certificates via acme.sh:  
+1. **Usage:**
+   ```bash
+   ./ssl_issue.sh -p <plugin> -d <comma-separated list of domains> [-d <another list> ...] [--dry-run]
+   ```
+2. **Parameters:**
+   * `-p <plugin>` - DNS plugin: cf (Cloudflare) or ovh.
+   * `-d <domain1,domain2,...>` - comma-separated list of domains for a single certificate. You can provide multiple `-d` for multiple certificates.
+   * `--dry-run` - optional, simulates actions without actually issuing or installing certificates.
+3. **Example – multiple certificates**
+   ```bash
+   ./ssl_issue.sh -p cf \
+   -d www.mysite.com,mysite.com,www.admin.mysite.com \
+   -d www.my_other_site.com,my_other_site.com
+   ```
+   Creates 2 certificates:
+      - www.mysite.com.key / www.mysite.com.crt → covers www.mysite.com,mysite.com,www.admin.mysite.com
+      - www.my_other_site.com.key / www.my_other_site.com.crt → covers www.my_other_site.com,my_other_site.com
+4. **Dry-run example**
+   ```bash
+   ./ssl_issue.sh -p ovh -d example.com,www.example.com --dry-run
+   ```
+   Shows all commands that would run, without executing them.
+
+5. **Installation**
+   * Certificates are installed in the SSL directory (`$SSL_CERTS_DIR` or default `../ssl`).
+   * Nginx is automatically reloaded after installation.
+   * Existing certificates are backed up to {`SSL_DIRECTORY/backup_TIMESTAMP/` before overwriting.
+
 
 #### Automatic renewal
 - acme.sh automatically installs a cron job, if it is unable to create cron job, you will see an error message like `Failed to install cron job. You need to manually renew your certs.`.  
