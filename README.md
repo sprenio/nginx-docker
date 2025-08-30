@@ -10,7 +10,7 @@
     * [Renew all existing certificates](#renew-all-existing-certificates)
     * [Automatic daily renewal (cron)](#automatic-daily-renewal-cron)
     * [Logs](#logs)
-  * [acme.sh (DNS-01 validation)](#2-acmesh-dns-01-validation)
+  * [acme.sh (DNS-01 validation)](#2-acmesh-dns-01-validation-via-helper-script)
     * [Installation and verification](#installation-and-verification)
     * [Example: Cloudflare](#example-cloudflare)
     * [Example: OVH](#example-ovh)
@@ -193,11 +193,11 @@ acme.sh --version
    > ```
 
 #### Install certificate for Nginx
-Install certificates using the helper script `ssl_issue.sh`.  
+Install certificates using the helper script `./bin/ssl_issue.sh`.  
 This script simplifies issuing and installing certificates via acme.sh:  
 1. **Usage:**
    ```bash
-   ./ssl_issue.sh -p <plugin> -d <comma-separated list of domains> [-d <another list> ...] [--dry-run]
+   ./bin/ssl_issue.sh -p <plugin> -d <comma-separated list of domains> [-d <another list> ...] [--dry-run]
    ```
 2. **Parameters:**
    * `-p <plugin>` - DNS plugin: cf (Cloudflare) or ovh.
@@ -205,7 +205,7 @@ This script simplifies issuing and installing certificates via acme.sh:
    * `--dry-run` - optional, simulates actions without actually issuing or installing certificates.
 3. **Example – multiple certificates**
    ```bash
-   ./ssl_issue.sh -p cf \
+   ./bin/ssl_issue.sh -p cf \
    -d www.mysite.com,mysite.com,www.admin.mysite.com \
    -d www.my_other_site.com,my_other_site.com
    ```
@@ -214,7 +214,7 @@ This script simplifies issuing and installing certificates via acme.sh:
       - www.my_other_site.com.key / www.my_other_site.com.crt → covers www.my_other_site.com,my_other_site.com
 4. **Dry-run example**
    ```bash
-   ./ssl_issue.sh -p ovh -d example.com,www.example.com --dry-run
+   ./bin/ssl_issue.sh -p ovh -d example.com,www.example.com --dry-run
    ```
    Shows all commands that would run, without executing them.
 
