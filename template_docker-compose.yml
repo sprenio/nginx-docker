@@ -37,6 +37,7 @@ services:
       # Odkomentuj poniższe jeśli chcesz instalować certyfikaty przez acme.sh
       # - ${SSL_CERTS_DIR:-./ssl}:/etc/ssl/certs:ro
 
+    # command: ["tail", "-f", "/dev/null"] # odkomentuj do debugowania
 
   phpmyadmin:
     container_name: phpmyadmin
