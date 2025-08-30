@@ -6,16 +6,11 @@ set -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEFAULT_SSL_DIR="$(realpath "${SCRIPT_DIR}/../ssl")"
 
-ACME_SH_PATH=$(which acme.sh 2>/dev/null)
-if [[ -z "$ACME_SH_PATH" ]]; then
-    echo "[ERROR] acme.sh not found in PATH. Please install it or add to PATH."
-    exit 1
-fi
-
 usage() {
-    echo "Usage: $0 -p <plugin_name> -d <comma-separated list of domains> [-d <another list> ...]"
+    echo "Usage: $0 -p <plugin_name> [-d <comma-separated list of domains>]... [--dry-run]"
     echo "  -p plugin_name: 'ovh' or 'cf'"
     echo "  -d domains: comma-separated list of domains (example: example.com,www.example.com)"
+    echo "  --dry-run: simulate the actions without executing them"
     exit 1
 }
 
@@ -73,6 +68,13 @@ mkdir -p "$BACKUP_DIR"
 
 log "Using SSL directory: $SSL_DIR"
 log "Backup directory: $BACKUP_DIR"
+
+# Znajdź pełną ścieżkę do acme.sh
+ACME_SH_PATH=$(which acme.sh 2>/dev/null)
+if [[ -z "$ACME_SH_PATH" ]]; then
+    error_exit "acme.sh not found in PATH. Please install it or add to PATH."
+fi
+log "Using acme.sh: $ACME_SH_PATH"
 
 # Przetwarzanie każdej listy domen
 for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
