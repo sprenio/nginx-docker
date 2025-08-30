@@ -19,7 +19,7 @@ log() {
 }
 
 error_exit() {
-    echo "[ERROR] $1"
+    echo "[ERROR] $1" > &2
     exit 1
 }
 
@@ -69,8 +69,7 @@ mkdir -p "$BACKUP_DIR"
 log "Using SSL directory: $SSL_DIR"
 log "Backup directory: $BACKUP_DIR"
 
-# Znajdź pełną ścieżkę do acme.sh
-ACME_SH_PATH=$(which acme.sh 2>/dev/null)
+ACME_SH_PATH="$HOME/.acme.sh/acme.sh"
 if [[ -z "$ACME_SH_PATH" ]]; then
     error_exit "acme.sh not found in PATH. Please install it or add to PATH."
 fi
