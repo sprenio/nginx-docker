@@ -177,16 +177,17 @@ acme.sh --version
    ```
 #### Install certificate for Nginx
 ```bash
-acme.sh --install-cert -d MAIN_DOMAIN \
+acme.sh --install-cert -d www.MAIN_DOMAIN \
 --key-file {path_to_ssl_private}/www.MAIN_DOMAIN.key \
 --fullchain-file {path_to_ssl_certs}/www.MAIN_DOMAIN.crt \
 --reloadcmd "docker exec nginx nginx -s reload"
 ```
 
 #### Automatic renewal
-- acme.sh automatically installs a cron job.
+- acme.sh automatically installs a cron job, if it is unable to create cron job, you will see an error message like `Failed to install cron job. You need to manually renew your certs.`.  
+  In that case you can add a cron job by yourself:
+  `/home/{user}/.acme.sh/acme.sh --cron --home "/home/{user}/.acme.sh" > /dev/null`
 - Certificates are renewed before expiry and Nginx is reloaded.
-- No manual cron entries are needed.
 
 ### 👉 Summary:
 - Use **Certbot** if you control port `80` and want a Docker-based setup.
