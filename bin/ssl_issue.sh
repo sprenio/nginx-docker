@@ -82,20 +82,22 @@ for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
 
     log "Processing certificate for domains: ${DOMAINS[*]}"
 
-    # Backup istniejących certyfikatów
-    for domain in "${DOMAINS[@]}"; do
-        KEY_FILE="${SSL_DIR}/${domain}.key"
-        CRT_FILE="${SSL_DIR}/${domain}.crt"
-        if [[ -f "$KEY_FILE" || -f "$CRT_FILE" ]]; then
-            log "Backing up existing cert/key for $domain"
-            mkdir -p "${BACKUP_DIR}/$domain"
-            [[ -f "$KEY_FILE" ]] && cp "$KEY_FILE" "${BACKUP_DIR}/$domain/"
-            [[ -f "$CRT_FILE" ]] && cp "$CRT_FILE" "${BACKUP_DIR}/$domain/"
-        fi
-    done
+    if [[ $DRY_RUN -eq 0 ]]; then
+      # Backup istniejących certyfikatów
+      for domain in "${DOMAINS[@]}"; do
+          KEY_FILE="${SSL_DIR}/${domain}.key"
+          CRT_FILE="${SSL_DIR}/${domain}.crt"
+          if [[ -f "$KEY_FILE" || -f "$CRT_FILE" ]]; then
+              log "Backing up existing cert/key for $domain"
+              mkdir -p "${BACKUP_DIR}/$domain"
+              [[ -f "$KEY_FILE" ]] && cp "$KEY_FILE" "${BACKUP_DIR}/$domain/"
+              [[ -f "$CRT_FILE" ]] && cp "$CRT_FILE" "${BACKUP_DIR}/$domain/"
+          fi
+      done
+    fi
 
     # Issue certyfikatu
-    ISSUE_CMD="${ACME_SH_PATH} --issue --dns dns_${PLUGIN}"
+    ISSUE_CMD="${ACME_SH_PATH} --issue --force --dns dns_${PLUGIN}"
     for domain in "${DOMAINS[@]}"; do
         ISSUE_CMD+=" -d $domain"
     done
@@ -112,8 +114,8 @@ for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
     # Instalacja certyfikatu dla pierwszej domeny
     INSTALL_CMD="${ACME_SH_PATH} --install-cert -d ${PRIMARY_DOMAIN} \
 --key-file ${SSL_DIR}/${PRIMARY_DOMAIN}.key \
---fullchain-file ${SSL_DIR}/${PRIMARY_DOMAIN}.crt \
---reloadcmd \"docker exec nginx nginx -s reload\""
+--fullchain-file ${SSL_DIR}/${PRIMARY_DOMAIN}.crt"
+# --reloadcmd \"docker exec nginx nginx -s reload\""
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log "[DRY RUN] Would run: $INSTALL_CMD"
@@ -128,3 +130,12 @@ for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
 done
 
 log "All certificates processed successfully."
+log "Reload nginx configuration."
+RELOAD_CMD="docker exec nginx nginx -s reload"
+if [[ $DRY_RUN -eq 1 ]]; then
+  log "[DRY RUN] Would run: ${RELOAD_CMD}"
+else
+  if ! eval "$RELOAD_CMD"; then
+      error_exit "Failed to reload nginx configuration"
+  fi
+fi
