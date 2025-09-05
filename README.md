@@ -260,10 +260,17 @@ This script simplifies issuing and installing certificates via acme.sh:
   ```bash
   docker compose down --remove-orphans -v
   ```
-* **Create Let's Encrypt certificate:**
-##
+* **Create Let's Encrypt certificate:**  
   Execute the following command, replacing YOUR@EMAIL.ARDRESS with your email address, MAIN_DOMAIN with your domain, and SUBDOMAIN with each subdomain for which you want to create a certificate:
   ```bash
   ./bin/createCerts.php -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -a YOUR@EMAIL.ARDRESS
   ```
+* **List of acme.sh certificates:**
+    ```bash
+    ~/.acme.sh/acme.sh --list
+    ```
+* **Remove acme.sh certificate:**
+    ```bash
+    ~/.acme.sh/acme.sh --remove -d example.com
+    ```
 ---
