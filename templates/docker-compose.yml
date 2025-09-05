@@ -35,6 +35,7 @@ services:
       # Odkomentuj poniższe jeśli chcesz instalować certyfikaty ssl przez certbota
       # - ${LETSENCRYPT_DIR:-./letsencrypt/etc}:/etc/letsencrypt:ro # certyfikaty i klucze (bind mount do hosta)
       # - ${CHALLENGE_DIR:-./letsencrypt/data}:/var/www/certbot:ro  # katalog dla challenge (wspólny z certbotem)
+
       # Odkomentuj poniższe jeśli chcesz instalować certyfikaty przez acme.sh
       # - ${SSL_CERTS_DIR:-./ssl}:/etc/ssl/certs:ro
 
