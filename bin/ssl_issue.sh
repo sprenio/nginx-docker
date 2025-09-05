@@ -5,12 +5,18 @@ set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEFAULT_SSL_DIR="$(realpath "${SCRIPT_DIR}/../ssl")"
+ACCOUNT_CONF="$HOME/.acme.sh/account.conf"
 
 usage() {
-    echo "Usage: $0 -p <plugin_name> [-d <comma-separated list of domains>]... [--dry-run]"
+    echo "Usage: $0 -p <plugin_name> [-d <comma-separated list of domains>]... [--dry-run] [--cf-token <token> --cf-account-id <id>] [--ovh-ak <key> --ovh-as <secret> --ovh-ck <ck>]"
     echo "  -p plugin_name: 'ovh' or 'cf'"
     echo "  -d domains: comma-separated list of domains (example: example.com,www.example.com)"
     echo "  --dry-run: simulate the actions without executing them"
+    echo "  --cf-token: Cloudflare API token"
+    echo "  --cf-account-id: Cloudflare account ID"
+    echo "  --ovh-ak: OVH Application Key"
+    echo "  --ovh-as: OVH Application Secret"
+    echo "  --ovh-ck: OVH Consumer Key"
     exit 1
 }
 
@@ -27,38 +33,64 @@ DRY_RUN=0
 PLUGIN=""
 DOMAIN_LISTS=()
 
+CF_TOKEN=""
+CF_ACCOUNT_ID=""
+OVH_AK=""
+OVH_AS=""
+OVH_CK=""
+
 # Parsowanie parametrów
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
         -p)
-            PLUGIN="$2"
-            shift 2
-            ;;
+            PLUGIN="$2"; shift 2;;
         -d)
-            if [[ -z "$2" ]]; then
-                error_exit "-d requires a comma-separated list of domains"
-            fi
-            DOMAIN_LISTS+=("$2")
-            shift 2
-            ;;
+            [[ -z "$2" ]] && error_exit "-d requires a comma-separated list of domains"
+            DOMAIN_LISTS+=("$2"); shift 2;;
         --dry-run)
-            DRY_RUN=1
-            shift
-            ;;
+            DRY_RUN=1; shift;;
+        --cf-token)
+            CF_TOKEN="$2"; shift 2;;
+        --cf-account-id)
+            CF_ACCOUNT_ID="$2"; shift 2;;
+        --ovh-ak)
+            OVH_AK="$2"; shift 2;;
+        --ovh-as)
+            OVH_AS="$2"; shift 2;;
+        --ovh-ck)
+            OVH_CK="$2"; shift 2;;
         *)
-            usage
-            ;;
+            usage;;
     esac
 done
 
 # Walidacja parametrów
-if [[ -z "$PLUGIN" || ${#DOMAIN_LISTS[@]} -eq 0 ]]; then
-    usage
+[[ -z "$PLUGIN" || ${#DOMAIN_LISTS[@]} -eq 0 ]] && usage
+[[ "$PLUGIN" != "ovh" && "$PLUGIN" != "cf" ]] && error_exit "Plugin must be 'ovh' or 'cf'"
+
+# Zapisanie danych uwierzytelniających do account.conf (jeśli podano)
+mkdir -p "$(dirname "$ACCOUNT_CONF")"
+touch "$ACCOUNT_CONF"
+chmod 600 "$ACCOUNT_CONF"
+
+if [[ "$PLUGIN" == "cf" && -n "$CF_TOKEN" && -n "$CF_ACCOUNT_ID" ]]; then
+    log "Saving Cloudflare credentials to $ACCOUNT_CONF"
+    sed -i '/^CF_Token=/d;/^CF_Account_ID=/d' "$ACCOUNT_CONF"
+    {
+      echo "CF_Token='$CF_TOKEN'"
+      echo "CF_Account_ID='$CF_ACCOUNT_ID'"
+    } >> "$ACCOUNT_CONF"
 fi
 
-if [[ "$PLUGIN" != "ovh" && "$PLUGIN" != "cf" ]]; then
-    error_exit "Plugin must be 'ovh' or 'cf'"
+if [[ "$PLUGIN" == "ovh" && -n "$OVH_AK" && -n "$OVH_AS" && -n "$OVH_CK" ]]; then
+    log "Saving OVH credentials to $ACCOUNT_CONF"
+    sed -i '/^OVH_AK=/d;/^OVH_AS=/d;/^OVH_CK=/d' "$ACCOUNT_CONF"
+    {
+      echo "OVH_AK='$OVH_AK'"
+      echo "OVH_AS='$OVH_AS'"
+      echo "OVH_CK='$OVH_CK'"
+    } >> "$ACCOUNT_CONF"
 fi
 
 # Katalog SSL
@@ -115,7 +147,6 @@ for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
     INSTALL_CMD="${ACME_SH_PATH} --install-cert -d ${PRIMARY_DOMAIN} \
 --key-file ${SSL_DIR}/${PRIMARY_DOMAIN}.key \
 --fullchain-file ${SSL_DIR}/${PRIMARY_DOMAIN}.crt"
-# --reloadcmd \"docker exec nginx nginx -s reload\""
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log "[DRY RUN] Would run: $INSTALL_CMD"

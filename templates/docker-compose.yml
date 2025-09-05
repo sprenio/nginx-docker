@@ -30,7 +30,7 @@ services:
       - ${WWW_PHP_FPM_SRC_DIR:-./src/php-fpm}:/var/www/src/php-fpm
       - ${NGINX_LOGS_DIR:-./logs}:/var/log/nginx
       - phpmyadmin-src-volume:/var/www/phpmyadmin:ro
-      - phalcon_app_www-src-volume:/var/www/src/phalconapp
+      # - phalcon_app_www-src-volume:/var/www/src/phalconapp # uncomment if you want to mount phalcon app source code
 
       # Odkomentuj poniższe jeśli chcesz instalować certyfikaty ssl przez certbota
       # - ${LETSENCRYPT_DIR:-./letsencrypt/etc}:/etc/letsencrypt:ro # certyfikaty i klucze (bind mount do hosta)
@@ -73,9 +73,8 @@ services:
 
 volumes:
   phpmyadmin-src-volume:
-  phalcon_app_www-src-volume:
-    external: true
-  letsencrypt-var:    # wolumen pomocniczy certbota
+#  phalcon_app_www-src-volume: # uncomment if you want to mount phalcon app source code
+#    external: true
 
 networks:
   reverse-proxy:

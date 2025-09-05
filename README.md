@@ -14,7 +14,7 @@
     * [Installation and verification](#installation-and-verification)
     * [Example: Cloudflare](#example-cloudflare)
     * [Example: OVH](#example-ovh)
-    * [Install certificate for Nginx](#install-certificate-for-nginx)
+    * [Usage of `ssl_issue.sh`](#usage-of-ssl_issuesh)
     * [Automatic renewal](#automatic-renewal)
   * [Summary](#-summary)
 * [Other commands](#-other-commands)
@@ -92,9 +92,10 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
     * `${NGINX_CONF_DIR}/error-sites/503.html` — default html page for 503 (Service Unavailable) error; you can copy `./templates/config/error-sites/503.html` file
     * `${NGINX_CONF_DIR}/error-sites/504.html` — default html page for 504 (Gateway Timeout) error; you can copy `./templates/config/error-sites/504.html` file
     > to copy all default error pages, run `cp ./templates/config/error-sites/*.html ./config/error-sites/`
-5. **Whitelist emila fo oauth2**
+5. **Whitelist email fo oauth2**
    * `${OAUTH2_DIR}/authorized_emails.txt` - create this file and add your email address, you can use template in `./templates/oauth2/authorized_emails.txt` files
-6. **docker-compose configuration**
+   > to create an empty allowlist file, run `touch ./oauth2/authorized_emails.txt` 
+6. **Docker-compose configuration**
     * Create docker-compose.yaml file, you can copy `templates/docker-compose.yml`
    > to copy a default configuration file, run `cp ./templates/docker-compose.yml ./docker-compose.yml`
 ---
@@ -164,44 +165,58 @@ acme.sh --version
 > ```bash
 > ~/.acme.sh/acme.sh --register-account -m your@email.com
 > ```
-> 
+#### Account registration (required once)
+Before issuing your first certificate, register an ACME account:
+```bash
+~/.acme.sh/acme.sh --register-account -m your@email.com
+````
+This step is required only once. After that, acme.sh will use the saved account credentials.
+
 #### Example: Cloudflare
 1. Create an API token in Cloudflare (scope: **DNS Edit** for the domain).
-2. Then add the following environment variables to `~/.acme.sh/acme.sh.env`:
+2. Run the helper script with your credentials for the first time:
    ```bash
-   export CF_Token="your_cloudflare_api_token"
-   export CF_Account_ID="your_cloudflare_account_id"
+   ./bin/ssl_issue.sh -p cf \
+   --cf-token "your_cloudflare_api_token" \
+   --cf-account-id "your_cloudflare_account_id" \
+   -d www.example.com,example.com
    ```
-   > ⚠️ Make sure the file is protected:
-   > ```shell
-   > chmod 600 ~/.acme.sh/acme.sh.env
-   > ```
+   The script will pass your credentials to `acme.sh` and they will be stored automatically in:
+   ```bash
+   ~/.acme.sh/account.conf
+   ```
+   For future renewals, credentials will be read from `account.conf` - no need to provide them again.
+
 #### Example: OVH
-1. **Create API credentials** at OVH API Console with DNS access:
+1. **Create API credentials** at [OVH API](https://www.ovh.com/auth/api/createToken) with DNS access:
    - GET /domain/zone/*
    - POST /domain/zone/*
    - DELETE /domain/zone/*
-2. Add the following environment variables to `~/.acme.sh/acme.sh.env`:
+2. Run the helper script with your credentials for the first time:
    ```bash
-   export OVH_AK="ApplicationKey"
-   export OVH_AS="ApplicationSecret"
-   export OVH_CK="ConsumerKey"
+   ./bin/ssl_issue.sh -p ovh \
+   --ovh-ak "ApplicationKey" \
+   --ovh-as "ApplicationSecret" \
+   --ovh-ck "ConsumerKey" \
+   -d www.example.com,example.com
    ```
-   > ⚠️ Make sure the file is protected:
-   > ```shell
-   > chmod 600 ~/.acme.sh/acme.sh.env
-   > ```
+   As with Cloudflare, credentials will be saved in:
+   ```bash
+   ~/.acme.sh/account.conf
+   ```
+   and reused automatically.
 
-#### Install certificate for Nginx
-Install certificates using the helper script `./bin/ssl_issue.sh`.  
+#### Usage of `ssl_issue.sh`
 This script simplifies issuing and installing certificates via acme.sh:  
 1. **Usage:**
    ```bash
-   ./bin/ssl_issue.sh -p <plugin> -d <comma-separated list of domains> [-d <another list> ...] [--dry-run]
+   ./bin/ssl_issue.sh -p <plugin> -d <comma-separated list of domains> [-d <another list> ...] [--dry-run] [--cf-token ... --cf-account-id ...] [--ovh-ak ... --ovh-as ... --ovh-ck ...]
    ```
 2. **Parameters:**
    * `-p <plugin>` - DNS plugin: cf (Cloudflare) or ovh.
    * `-d <domain1,domain2,...>` - comma-separated list of domains for a single certificate. You can provide multiple `-d` for multiple certificates.
+   * `--cf-token`, `--cf-account-id` - Cloudflare credentials (only needed on first run).
+   * `--ovh-ak`, `--ovh-as`, `--ovh-ck` - OVH credentials (only needed on first run).
    * `--dry-run` - optional, simulates actions without actually issuing or installing certificates.
 3. **Example – multiple certificates**
    ```bash
