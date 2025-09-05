@@ -61,6 +61,7 @@ while [[ $# -gt 0 ]]; do
         --ovh-ck)
             OVH_CK="$2"; shift 2;;
         *)
+          echo "Unknown option: $1"
             usage;;
     esac
 done
