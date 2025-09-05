@@ -56,7 +56,7 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
              │   └─────────────┴─────────────┘   │
              │                                   │
              │   ┌─────────────┬─────────────┐   │
-             │   │        Container 1        │   │
+             │   │        Container 3        │   │
              └───→    DB 3     │    APP 3    ←───┘
                  │             │             │
                  └─────────────┴─────────────┘
