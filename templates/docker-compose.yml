@@ -49,6 +49,7 @@ services:
     volumes:
       - phpmyadmin-src-volume:/var/www/html
       - ${PHPMYADMIN_CONF_DIR:-./config/phpmyadmin}/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:latest
     container_name: dbadmin-oauth2

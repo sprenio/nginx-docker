@@ -103,6 +103,7 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
 ## 🗄️ PHPMyAdmin
 * Accessible through Nginx reverse proxy (no ports exposed externally).
 * Edit `${PHPMYADMIN_CONF_DIR}/config.user.inc.php` for custom servers, users, and auth type.
+* To create an empty config file, run `touch ./config/phpmyadmin/config.user.inc.php`
 
 ---
 
