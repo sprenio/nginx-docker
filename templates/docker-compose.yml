@@ -23,14 +23,13 @@ services:
       - ${NGINX_CONF_DIR:-./config}/snippets/error-pages.conf:/etc/nginx/snippets/error-pages.conf
       - ${NGINX_CONF_DIR:-./config}/snippets/http-def.conf:/etc/nginx/snippets/http-def.conf
       - ${NGINX_CONF_DIR:-./config}/snippets/https-def.conf:/etc/nginx/snippets/https-def.conf
-      - ${NGINX_CONF_DIR:-./config}/snippets/php-fpm.conf:/etc/nginx/snippets/php-fpm.conf
       - ${NGINX_CONF_DIR:-./config}/snippets/static-files.conf:/etc/nginx/snippets/static-files.conf
       - ${WWW_DEFAULT_SRC_DIR:-./src/default}:/var/www/src/default
       - ${WWW_STATIC_SRC_DIR:-./src/static}:/var/www/src/static
       - ${WWW_PHP_FPM_SRC_DIR:-./src/php-fpm}:/var/www/src/php-fpm
       - ${NGINX_LOGS_DIR:-./logs}:/var/log/nginx
       - phpmyadmin-src-volume:/var/www/phpmyadmin:ro
-      # - phalcon_app_www-src-volume:/var/www/src/phalconapp # uncomment if you want to mount phalcon app source code
+      # - phalcon_app_www-src-volume:/var/www/src/phalcon_app # uncomment if you want to mount phalcon app source code
 
       # Odkomentuj poniższe jeśli chcesz instalować certyfikaty ssl przez certbota
       # - ${LETSENCRYPT_DIR:-./letsencrypt/etc}:/etc/letsencrypt:ro # certyfikaty i klucze (bind mount do hosta)
