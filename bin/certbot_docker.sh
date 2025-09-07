@@ -96,6 +96,8 @@ delete_certs() {
     IFS=',' read -ra DOMAINS_ARR <<< "$DELETE_DOMAINS"
     for domain in "${DOMAINS_ARR[@]}"; do
         echo "Deleting certificate for: $domain" | tee -a "$LOG_FILE"
+
+        # Usunięcie certyfikatu przez certbota
         docker run --rm \
             -v "$LETSENCRYPT_DIR":/etc/letsencrypt \
             certbot/certbot delete \
@@ -104,10 +106,13 @@ delete_certs() {
             --quiet \
             2>&1 | tee -a "$LOG_FILE"
 
-        # dodatkowe sprzątanie (opcjonalne, certbot powinien sam usunąć)
-        rm -rf "$LETSENCRYPT_DIR/live/$domain" \
-               "$LETSENCRYPT_DIR/archive/$domain" \
-               "$LETSENCRYPT_DIR/renewal/$domain.conf" || true
+        # Dodatkowe sprzątanie na wszelki wypadek (w kontenerze, jako root)
+        docker run --rm \
+            -v "$LETSENCRYPT_DIR":/etc/letsencrypt \
+            alpine sh -c "rm -rf /etc/letsencrypt/live/$domain \
+                             /etc/letsencrypt/archive/$domain \
+                             /etc/letsencrypt/renewal/$domain.conf" \
+            2>&1 | tee -a "$LOG_FILE"
     done
 }
 
