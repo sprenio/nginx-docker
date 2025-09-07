@@ -235,7 +235,7 @@ This script simplifies issuing and installing certificates via acme.sh:
    Shows all commands that would run, without executing them.
 
 5. **Installation**
-   * Certificates are installed in the SSL directory (`$SSL_CERTS_DIR` or default `../ssl`).
+   * Certificates are installed in the SSL directory (`$SSL_CERTS_DIR` or default `./ssl/certs`).
    * Nginx is automatically reloaded after installation.
    * Existing certificates are backed up to {`SSL_DIRECTORY/backup_TIMESTAMP/` before overwriting.
 

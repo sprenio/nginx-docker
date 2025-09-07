@@ -36,7 +36,7 @@ services:
       # - ${CHALLENGE_DIR:-./letsencrypt/data}:/var/www/certbot:ro  # katalog dla challenge (wspólny z certbotem)
 
       # Odkomentuj poniższe jeśli chcesz instalować certyfikaty przez acme.sh
-      # - ${SSL_CERTS_DIR:-./ssl}:/etc/ssl/certs:ro
+      # - ${SSL_CERTS_DIR:-./ssl/certs}:/etc/ssl/certs:ro
 
     # command: ["tail", "-f", "/dev/null"] # odkomentuj do debugowania
 

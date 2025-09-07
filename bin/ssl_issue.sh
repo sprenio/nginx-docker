@@ -4,7 +4,7 @@ set -e
 set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEFAULT_SSL_DIR="$(realpath "${SCRIPT_DIR}/../ssl")"
+DEFAULT_SSL_DIR="$(realpath "${SCRIPT_DIR}/../ssl/certs")"
 ACCOUNT_CONF="$HOME/.acme.sh/account.conf"
 
 usage() {
