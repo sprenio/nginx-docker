@@ -35,14 +35,16 @@ usage() {
 
 # Parsowanie parametrów
 RENEW=false
-while getopts "d:e:r" opt; do
+while getopts "d:e:rx:" opt; do
     case $opt in
         d) DOMAINS="$OPTARG" ;;
         e) EMAIL="$OPTARG" ;;
         r) RENEW=true ;;
+        x) DELETE_DOMAINS="$OPTARG" ;;
         *) usage ;;
     esac
 done
+
 
 # Wymagany email zawsze
 if [[ -z "$EMAIL" ]]; then
@@ -89,10 +91,31 @@ create_certs() {
         --non-interactive \
         2>&1 | tee -a "$LOG_FILE"
 }
+delete_certs() {
+    echo "Deleting certificates for: $DELETE_DOMAINS" | tee -a "$LOG_FILE"
+    IFS=',' read -ra DOMAINS_ARR <<< "$DELETE_DOMAINS"
+    for domain in "${DOMAINS_ARR[@]}"; do
+        echo "Deleting certificate for: $domain" | tee -a "$LOG_FILE"
+        docker run --rm \
+            -v "$LETSENCRYPT_DIR":/etc/letsencrypt \
+            certbot/certbot delete \
+            --cert-name "$domain" \
+            --non-interactive \
+            --quiet \
+            2>&1 | tee -a "$LOG_FILE"
+
+        # dodatkowe sprzątanie (opcjonalne, certbot powinien sam usunąć)
+        rm -rf "$LETSENCRYPT_DIR/live/$domain" \
+               "$LETSENCRYPT_DIR/archive/$domain" \
+               "$LETSENCRYPT_DIR/renewal/$domain.conf" || true
+    done
+}
 
 # Wykonanie akcji
 if [ "$RENEW" = true ]; then
     renew_all_certs
+elif [[ -n "$DELETE_DOMAINS" ]]; then
+    delete_certs
 else
     if [[ -z "$DOMAINS" ]]; then
         echo "Error: missing domains for new certificate creation." | tee -a "$LOG_FILE"

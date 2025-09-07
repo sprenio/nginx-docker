@@ -125,8 +125,13 @@ See [Let's Encrypt documentation](https://letsencrypt.org/docs/) for more detail
 #### Create a new certificate
 Run the script with a comma-separated list of domains and an email address for notifications:
 ```bash
-./bin/certbot_docker.sh -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -e my@email.com
+./bin/certbot_docker.sh -d www.MAIN_DOMAIN,MAIN_DOMAIN,www.SUBDOMAIN.MAIN_DOMAIN,SUBDOMAIN.MAIN_DOMAIN -e admin@example.com
 ````
+#### Removing a certificate
+To remove a certificate, run the script with the `-x` option and a comma-separated list of domains: 
+```bash
+./bin/certbot_docker.sh -x "www.MAIN_DOMAIN,www.OTHER_MAIN_DOMAIN" -e admin@example.com
+```
 
 #### Renew all existing certificates
 Renew all existing certificates in the project:
@@ -138,6 +143,7 @@ Add the following line to your crontab to automatically renew certificates and r
 ```
 0 3 * * * /path/to/project/bin/certbot_docker.sh -e my@email.com -r
 ```
+
 #### Logs
 Each run of the script generates a log file in `./logs/`, for example:
 ```bash
