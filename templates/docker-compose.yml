@@ -29,12 +29,13 @@ services:
       - ${WWW_PHP_FPM_SRC_DIR:-./src/php-fpm}:/var/www/src/php-fpm
       - ${NGINX_LOGS_DIR:-./logs}:/var/log/nginx
       - phpmyadmin-src-volume:/var/www/phpmyadmin:ro
+      - ${SSL_FALLBACK_CERTS_DIR:-./ssl/fallback}:/etc/ssl/fallback:ro
       # - phalcon_app_www-src-volume:/var/www/src/phalcon_app # uncomment if you want to mount phalcon app source code
 
       # Odkomentuj poniższe jeśli chcesz instalować certyfikaty ssl przez certbota
       # - ${LETSENCRYPT_DIR:-./letsencrypt/etc}:/etc/letsencrypt:ro # certyfikaty i klucze (bind mount do hosta)
-      # - ${CHALLENGE_DIR:-./letsencrypt/data}:/var/www/certbot:ro  # katalog dla challenge (wspólny z certbotem)
 
+      # - ${CHALLENGE_DIR:-./letsencrypt/data}:/var/www/certbot:ro  # katalog dla challenge (wspólny z certbotem)
       # Odkomentuj poniższe jeśli chcesz instalować certyfikaty przez acme.sh
       # - ${SSL_CERTS_DIR:-./ssl/certs}:/etc/ssl/certs:ro
 
