@@ -3,15 +3,19 @@
 * [Overview](#-overview)
 * [Setup](#-setup)
 * [PHPMyAdmin](#-phpmyadmin)
+* [MailHog (Development)](#-mailhog-development)
 * [Start Docker Compose](#-start-docker-compose)
 * [TLS/SSL Certificates](#-tlsssl-certificates)
   * [Certbot](#1-certbot-http-01-validation)
     * [Create a new certificate](#create-a-new-certificate)
+    * [Removing a certificate](#removing-a-certificate)
     * [Renew all existing certificates](#renew-all-existing-certificates)
     * [Automatic daily renewal (cron)](#automatic-daily-renewal-cron)
     * [Logs](#logs)
   * [acme.sh (DNS-01 validation)](#2-acmesh-dns-01-validation-via-helper-script)
     * [Installation and verification](#installation-and-verification)
+    * [Switch to **Let's Encrypt** as default CA](#switch-to-lets-encrypt-as-the-default-ca-recommended)
+    * [Account registration (required once)](#account-registration-required-once)
     * [Example: Cloudflare](#example-cloudflare)
     * [Example: OVH](#example-ovh)
     * [Usage of `ssl_issue.sh`](#usage-of-ssl_issuesh)
@@ -67,18 +71,19 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
 
 ---
 
-## ⚙️ Setup
+## ⚙ Setup
 
-1. **Create Docker network**
+1. **Create Docker networks**
    ```bash
    docker network create reverse-proxy
+   docker network create db-admin
    ```  
 2. **Environment variables**  
    Copy `.env` from `sample.env` and edit values as needed.
 3. **Configuration files**
     * `${NGINX_CONF_DIR}/default_server.conf` — configuration of default server; you can copy `./templates/config/default_server.conf` file
     * `${NGINX_CONF_DIR}/nginx.conf` — nginx configuration; you can copy `./templates/config/nginx.conf` file
-    * `${NGINX_CONF_DIR}/sites/*.conf` — configuration files for enabled sites; you can use templates in `./templates/config/sites/*.conf` files
+    * `${NGINX_CONF_DIR}/sites/*.conf` — configuration files for enabled sites; you can use templates in `./templates/config/sites/*.conf` files (e.g. `./templates/config/sites/mailhog.conf` for MailHog)
     * `${PHPMYADMIN_CONF_DIR}/config.user.inc.php` — **PHPMyAdmin** — template config in `./templates/config/phpmyadmin/config.user.inc.php`
    > to copy all default configuration files, run `cp templates/config/*.conf config/` 
 4. **Error pages**
@@ -91,7 +96,7 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
     * `${NGINX_CONF_DIR}/error-sites/502.html` — default html page for 502 (Bad Gateway) error; you can copy `./templates/config/error-sites/502.html` file
     * `${NGINX_CONF_DIR}/error-sites/503.html` — default html page for 503 (Service Unavailable) error; you can copy `./templates/config/error-sites/503.html` file
     * `${NGINX_CONF_DIR}/error-sites/504.html` — default html page for 504 (Gateway Timeout) error; you can copy `./templates/config/error-sites/504.html` file
-    > to copy all default error pages, run `cp ./templates/config/error-sites/*.html ./config/error-sites/`
+   > to copy all default error pages, run `cp ./templates/config/error-sites/*.html ./config/error-sites/`
 5. **Whitelist email fo oauth2**
    * `${OAUTH2_DIR}/authorized_emails.txt` - create this file and add your email address, you can use template in `./templates/oauth2/authorized_emails.txt` files
    > to create an empty allowlist file, run `touch ./oauth2/authorized_emails.txt` 
@@ -100,17 +105,35 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
    > to copy a default configuration file, run `cp ./templates/docker-compose.yml ./docker-compose.yml`
 ---
 
-## 🗄️ PHPMyAdmin
+## 🗄 PHPMyAdmin
 * Accessible through Nginx reverse proxy (no ports exposed externally).
 * Edit `${PHPMYADMIN_CONF_DIR}/config.user.inc.php` for custom servers, users, and auth type.
 * To create an empty config file, run `touch ./config/phpmyadmin/config.user.inc.php`
 
 ---
 
+## ✉ MailHog (Development)
+MailHog is an email-testing tool for local/development environments with a built-in Web UI.
+* **Compose profile:** Disabled by default; runs only when the `dev` profile is active.
+* **SMTP server (backend containers):** `mailhog:1025` (via `reverse-proxy` network).
+* **Web UI (viewing emails):** Accessible through Nginx reverse proxy at `http://mailhog.localhost` (or `http://www.mailhog.localhost`) using `./templates/config/sites/mailhog.conf`.
+
+---
+
 ## 🐳 Start Docker compose
-```bash
-docker compose up -V -d
-```
+
+* **Standard / Production** (starts Nginx and PHPMyAdmin):
+  ```bash
+  docker compose up -V -d
+  ```
+
+* **Development** (starts Nginx, PHPMyAdmin, and MailHog):
+  ```bash
+  docker compose --profile dev up -V -d
+  ```
+  > 💡 *You can also uncomment `COMPOSE_PROFILES=dev` in your `.env` file to automatically include MailHog when running `docker compose up -d`.*
+
+---
 
 ## 🔒 TLS/SSL Certificates
 

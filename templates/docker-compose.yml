@@ -33,14 +33,14 @@ services:
       - app_share_volume:/var/www/share:ro
       # - phalcon_app_www-src-volume:/var/www/src/phalcon_app # uncomment if you want to mount phalcon app source code
 
-      # Odkomentuj poniższe jeśli chcesz instalować certyfikaty ssl przez certbota
-      # - ${LETSENCRYPT_DIR:-./letsencrypt/etc}:/etc/letsencrypt:ro # certyfikaty i klucze (bind mount do hosta)
+      # Uncomment the following if you want to install SSL certificates via Certbot
+      # - ${LETSENCRYPT_DIR:-./letsencrypt/etc}:/etc/letsencrypt:ro # certificates and keys (bind mount from host)
 
-      # - ${CHALLENGE_DIR:-./letsencrypt/data}:/var/www/certbot:ro  # katalog dla challenge (wspólny z certbotem)
-      # Odkomentuj poniższe jeśli chcesz instalować certyfikaty przez acme.sh
+      # - ${CHALLENGE_DIR:-./letsencrypt/data}:/var/www/certbot:ro  # challenge directory (shared with certbot)
+      # Uncomment the following if you want to install certificates via acme.sh
       # - ${SSL_CERTS_DIR:-./ssl/certs}:/etc/ssl/certs:ro
 
-    # command: ["tail", "-f", "/dev/null"] # odkomentuj do debugowania
+    # command: ["tail", "-f", "/dev/null"] # uncomment for debugging
 
   phpmyadmin:
     container_name: phpmyadmin
@@ -48,6 +48,7 @@ services:
     restart: unless-stopped
     networks:
       - reverse-proxy
+      - db-admin
     volumes:
       - phpmyadmin-src-volume:/var/www/html
       - ${PHPMYADMIN_CONF_DIR:-./config/phpmyadmin}/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
@@ -58,15 +59,15 @@ services:
     env_file: .env
     environment:
       OAUTH2_PROXY_PROVIDER: google
-      OAUTH2_PROXY_COOKIE_SECURE: "true"     # USTAW "true" gdy masz HTTPS!
+      OAUTH2_PROXY_COOKIE_SECURE: "true"     # Set to "true" when using HTTPS!
       OAUTH2_PROXY_COOKIE_SAMESITE: lax
-      OAUTH2_PROXY_EMAIL_DOMAINS: ""   # nie wpuszczaj wszystkich
-      OAUTH2_PROXY_AUTHENTICATED_EMAILS_FILE: /etc/oauth2-proxy/authorized_emails.txt  # ...ale tylko z tej listy wejdą dalej
-      OAUTH2_PROXY_UPSTREAMS: "file:///dev/null"   # niczego nie proxujemy przez oauth2-proxy, używamy go tylko do auth_request
+      OAUTH2_PROXY_EMAIL_DOMAINS: ""   # do not allow all domains
+      OAUTH2_PROXY_AUTHENTICATED_EMAILS_FILE: /etc/oauth2-proxy/authorized_emails.txt  # only emails from this list are allowed
+      OAUTH2_PROXY_UPSTREAMS: "file:///dev/null"   # nothing is proxied through oauth2-proxy, used solely for auth_request
       OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
       OAUTH2_PROXY_REVERSE_PROXY: "true"
       OAUTH2_PROXY_SET_XAUTHREQUEST: "true"
-      # Poniższe trzy MUSZĄ być ustawione (w .env):
+      # The following must be set in .env:
       OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
       OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
       OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
@@ -77,6 +78,21 @@ services:
       - ${OAUTH2_DIR:-./oauth2}/authorized_emails.txt:/etc/oauth2-proxy/authorized_emails.txt:ro
     restart: unless-stopped
 
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog:latest
+    platform: linux/amd64
+    restart: unless-stopped
+    profiles:
+      - dev
+
+    #ports:
+    #  - "1025:1025" # SMTP port
+    #  - "8025:8025" # Web UI port
+
+    networks:
+      - reverse-proxy
+
 volumes:
   phpmyadmin-src-volume:
   app_share_volume:
@@ -85,4 +101,6 @@ volumes:
 
 networks:
   reverse-proxy:
+    external: true
+  db-admin:
     external: true
