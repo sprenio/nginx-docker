@@ -30,13 +30,13 @@ services:
       - ${NGINX_LOGS_DIR:-./logs}:/var/log/nginx
       - phpmyadmin-src-volume:/var/www/phpmyadmin:ro
       - ${SSL_FALLBACK_CERTS_DIR:-./ssl/fallback}:/etc/ssl/fallback:ro
-      - app_share_volume:/var/www/share:ro
-      # - phalcon_app_www-src-volume:/var/www/src/phalcon_app # uncomment if you want to mount phalcon app source code
+      # Uncomment the following if you want to mount phalcon app source code
+      # - phalcon_app_www-src-volume:/var/www/src/phalcon_app
 
       # Uncomment the following if you want to install SSL certificates via Certbot
       # - ${LETSENCRYPT_DIR:-./letsencrypt/etc}:/etc/letsencrypt:ro # certificates and keys (bind mount from host)
-
       # - ${CHALLENGE_DIR:-./letsencrypt/data}:/var/www/certbot:ro  # challenge directory (shared with certbot)
+
       # Uncomment the following if you want to install certificates via acme.sh
       # - ${SSL_CERTS_DIR:-./ssl/certs}:/etc/ssl/certs:ro
 
@@ -78,24 +78,8 @@ services:
       - ${OAUTH2_DIR:-./oauth2}/authorized_emails.txt:/etc/oauth2-proxy/authorized_emails.txt:ro
     restart: unless-stopped
 
-  mailhog:
-    container_name: mailhog
-    image: mailhog/mailhog:latest
-    platform: linux/amd64
-    restart: unless-stopped
-    profiles:
-      - dev
-
-    #ports:
-    #  - "1025:1025" # SMTP port
-    #  - "8025:8025" # Web UI port
-
-    networks:
-      - reverse-proxy
-
 volumes:
   phpmyadmin-src-volume:
-  app_share_volume:
 #  phalcon_app_www-src-volume: # uncomment if you want to mount phalcon app source code
 #    external: true
 

@@ -101,8 +101,10 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
    * `${OAUTH2_DIR}/authorized_emails.txt` - create this file and add your email address, you can use template in `./templates/oauth2/authorized_emails.txt` files
    > to create an empty allowlist file, run `touch ./oauth2/authorized_emails.txt` 
 6. **Docker-compose configuration**
-    * Create docker-compose.yaml file, you can copy `templates/docker-compose.yml`
-   > to copy a default configuration file, run `cp ./templates/docker-compose.yml ./docker-compose.yml`
+    * Create `docker-compose.yml` file, you can copy `./templates/docker-compose.yml`
+    > to copy the default configuration file, run `cp ./templates/docker-compose.yml ./docker-compose.yml`
+    * **(Development only)** Copy `./templates/docker-compose.override.yml` to `./docker-compose.override.yml` to enable local dev overrides (disables `oauth2-proxy`, adds `mailhog`, uses ARM64 image for phpMyAdmin on Apple Silicon):
+    > to copy the development override file, run `cp ./templates/docker-compose.override.yml ./docker-compose.override.yml`
 ---
 
 ## 🗄 PHPMyAdmin
@@ -114,7 +116,7 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
 
 ## ✉ MailHog (Development)
 MailHog is an email-testing tool for local/development environments with a built-in Web UI.
-* **Compose profile:** Disabled by default; runs only when the `dev` profile is active.
+* **Development setup:** Automatically enabled when `docker-compose.override.yml` is present.
 * **SMTP server (backend containers):** `mailhog:1025` (via `reverse-proxy` network).
 * **Web UI (viewing emails):** Accessible through Nginx reverse proxy at `http://mailhog.localhost` (or `http://www.mailhog.localhost`) using `./templates/config/sites/mailhog.conf`.
 
@@ -122,16 +124,12 @@ MailHog is an email-testing tool for local/development environments with a built
 
 ## 🐳 Start Docker compose
 
-* **Standard / Production** (starts Nginx and PHPMyAdmin):
-  ```bash
-  docker compose up -V -d
-  ```
+```bash
+docker compose up -V -d
+```
 
-* **Development** (starts Nginx, PHPMyAdmin, and MailHog):
-  ```bash
-  docker compose --profile dev up -V -d
-  ```
-  > 💡 *You can also uncomment `COMPOSE_PROFILES=dev` in your `.env` file to automatically include MailHog when running `docker compose up -d`.*
+* **Production:** With only `docker-compose.yml`, it starts the production stack (`nginx`, `phpmyadmin`, `oauth2-proxy`).
+* **Development:** When `docker-compose.override.yml` is present, Docker Compose automatically merges it with `docker-compose.yml` (starts `nginx`, `phpmyadmin`, and `mailhog`, while skipping `oauth2-proxy`).
 
 ---
 

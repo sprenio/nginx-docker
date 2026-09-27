@@ -1,0 +1,18 @@
+services:
+  # Disable oauth2-proxy on dev by assigning an inactive profile
+  oauth2-proxy:
+    profiles:
+      - donotstart
+
+  phpmyadmin:
+    image: arm64v8/phpmyadmin:5.2-fpm
+
+  # Add MailHog on dev
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog:latest
+    platform: linux/amd64
+    restart: unless-stopped
+
+    networks:
+      - reverse-proxy
