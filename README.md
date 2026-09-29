@@ -80,6 +80,9 @@ This setup provides a **reverse proxy layer** on top of your other Docker contai
    ```  
 2. **Environment variables**  
    Copy `.env` from `sample.env` and edit values as needed.
+   ```bash
+   cp sample.env .env
+   ```
 3. **Configuration files**
     * `${NGINX_CONF_DIR}/default_server.conf` — configuration of default server; you can copy `./templates/config/default_server.conf` file
     * `${NGINX_CONF_DIR}/nginx.conf` — nginx configuration; you can copy `./templates/config/nginx.conf` file
@@ -172,35 +175,40 @@ Each run of the script generates a log file in `./logs/`, for example:
 ```
 
 ### 2. acme.sh (DNS-01 validation via helper script)
-Certificates are obtained via DNS challenges.  
 **Use when:**
-- Your domain is behind a CDN/proxy (e.g. Cloudflare orange cloud).
-- You don't want to expose port 80 at all.
-- You prefer fully automated issuance and renewal via DNS APIs.
+- You need a **Wildcard certificate** (`*.yourdomain.com`).
+- Ports 80 and 443 are blocked by your ISP, firewall, or cloud provider.
+- You want to issue SSL certificates without running a temporary web server or modifying Nginx during validation.
+- Your DNS provider supports API integration (e.g., Cloudflare, OVH, DigitalOcean, Route53, CyberFolks).
 
-#### Installation and verification
+#### Step 1: Install acme.sh
+
+Install `acme.sh` directly on your host machine:
 ```bash
 curl https://get.acme.sh | sh
 export PATH="~/.acme.sh:$PATH"
 acme.sh --version
 ```
-#### Switch to **Let's Encrypt** as the default CA (recommended):
-```bash
-~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-```
-> ℹ️ By default, acme.sh uses ZeroSSL.  
-> If you prefer ZeroSSL, register an account once with:
-> ```bash
-> ~/.acme.sh/acme.sh --register-account -m your@email.com
-> ```
-#### Account registration (required once)
-Before issuing your first certificate, register an ACME account:
-```bash
-~/.acme.sh/acme.sh --register-account -m your@email.com
-````
-This step is required only once. After that, acme.sh will use the saved account credentials.
 
-#### Example: Cloudflare
+#### Step 2: Set Default Certificate Authority (Let's Encrypt)
+
+> **Note on Certificate Authority (CA):**  
+> Since v3.0, `acme.sh` uses **ZeroSSL** by default. To use **Let's Encrypt** instead, explicitly set it as the default CA before registering your account:
+
+```bash
+# Set Let's Encrypt as default CA
+~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+
+# Register your account with Let's Encrypt
+~/.acme.sh/acme.sh --register-account -m your@email.com
+```
+---
+
+#### Step 3: Issue Wildcard or Standard Certificates via DNS API
+
+Choose your DNS provider and export the required API credentials, then issue the certificate.
+
+##### Example: Cloudflare
 1. Create an API token in Cloudflare (scope: **DNS Edit** for the domain).
 2. Run the helper script with your credentials for the first time:
    ```bash
@@ -215,7 +223,7 @@ This step is required only once. After that, acme.sh will use the saved account 
    ```
    For future renewals, credentials will be read from `account.conf` - no need to provide them again.
 
-#### Example: OVH
+##### Example: OVH
 1. **Create API credentials** at [OVH API](https://www.ovh.com/auth/api/createToken) with DNS access:
    - GET /domain/zone/*
    - POST /domain/zone/*
