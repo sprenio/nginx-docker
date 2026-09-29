@@ -202,7 +202,6 @@ acme.sh --version
 # Register your account with Let's Encrypt
 ~/.acme.sh/acme.sh --register-account -m your@email.com
 ```
----
 
 #### Step 3: Issue Wildcard or Standard Certificates via DNS API
 
