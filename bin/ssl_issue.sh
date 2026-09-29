@@ -145,9 +145,16 @@ for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
     fi
 
     # Instalacja certyfikatu dla pierwszej domeny
-    INSTALL_CMD="${ACME_SH_PATH} --install-cert -d ${PRIMARY_DOMAIN} \
---key-file ${SSL_DIR}/${PRIMARY_DOMAIN}.key \
---fullchain-file ${SSL_DIR}/${PRIMARY_DOMAIN}.crt"
+    # Czyszczenie nazwy domeny z gwiazdki (*.), gdyby wildcard był podany jako pierwszy
+    SAFE_DOMAIN_NAME="${PRIMARY_DOMAIN#\*\.}"
+
+    # Zdefiniowanie komendy automatycznego przeładowania Nginx w Dockerze
+    DOCKER_RELOAD_CMD="docker exec nginx nginx -s reload"
+
+    INSTALL_CMD="${ACME_SH_PATH} --install-cert -d ${PRIMARY_DOMAIN} --ecc \
+--key-file ${SSL_DIR}/${SAFE_DOMAIN_NAME}.key \
+--fullchain-file ${SSL_DIR}/${SAFE_DOMAIN_NAME}.crt \
+--reloadcmd \"${DOCKER_RELOAD_CMD}\""
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log "[DRY RUN] Would run: $INSTALL_CMD"
@@ -162,12 +169,3 @@ for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
 done
 
 log "All certificates processed successfully."
-log "Reload nginx configuration."
-RELOAD_CMD="docker exec nginx nginx -s reload"
-if [[ $DRY_RUN -eq 1 ]]; then
-  log "[DRY RUN] Would run: ${RELOAD_CMD}"
-else
-  if ! eval "$RELOAD_CMD"; then
-      error_exit "Failed to reload nginx configuration"
-  fi
-fi
