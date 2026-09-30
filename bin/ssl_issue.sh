@@ -130,7 +130,7 @@ for DOMAIN_CSV in "${DOMAIN_LISTS[@]}"; do
     fi
 
     # Issue certyfikatu
-    ISSUE_CMD="${ACME_SH_PATH} --issue --force --dns dns_${PLUGIN} --dnssleep 10"
+    ISSUE_CMD="${ACME_SH_PATH} --issue --ecc --force --dns dns_${PLUGIN} --dnssleep 10"
     for domain in "${DOMAINS[@]}"; do
         ISSUE_CMD+=" -d $domain"
     done
