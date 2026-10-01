@@ -4,6 +4,7 @@
 * [Setup](#-setup)
 * [PHPMyAdmin](#-phpmyadmin)
 * [MailHog (Development)](#-mailhog-development)
+* [Google OAuth 2.0 Setup](#-google-oauth-20-setup)
 * [Start Docker Compose](#-start-docker-compose)
 * [TLS/SSL Certificates](#-tlsssl-certificates)
   * [Certbot](#1-certbot-http-01-validation)
@@ -124,6 +125,59 @@ MailHog is an email-testing tool for local/development environments with a built
 * **Web UI (viewing emails):** Accessible through Nginx reverse proxy at `http://mailhog.localhost` (or `http://www.mailhog.localhost`) using `./templates/config/sites/mailhog.conf`.
 
 ---
+
+## 🔐 Google OAuth 2.0 Setup
+
+`oauth2-proxy` requires a Google OAuth 2.0 Client ID and Secret to authenticate users. Follow these steps to configure your Google Credentials and project environment:
+
+### 1. Create or Update Google OAuth 2.0 Credentials
+
+1. Go to the [Google Cloud Console -> Credentials](https://console.cloud.google.com/apis/credentials).
+2. Select your project (or create a new one).
+3. If you don't have an OAuth Client yet:
+   - Click **Create Credentials** -> **OAuth client ID**.
+   - Select Application type: **Web application**.
+   - Give it a recognizable name (e.g., `Nginx Reverse Proxy Auth`).
+4. If you already have an existing OAuth Client, simply click on its name to edit it.
+5. In the client configuration, update the following fields:
+   - **Authorized JavaScript origins**:
+     - `https://your-domain.com`
+   - **Authorized redirect URIs**:
+     - `https://your-domain.com/oauth2/callback` 
+   > 💡 **Note:** You can add multiple domains/subdomains under the same Client ID by adding new entries to these lists.
+6. Click **Save**. Copy the **Client ID** and **Client Secret**.
+
+---
+
+### 2. Configure Environment Variables (`.env`)
+
+Add or update the following variables in your `.env` file:
+
+```env
+# Google OAuth Credentials
+OAUTH2_PROXY_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+OAUTH2_PROXY_CLIENT_SECRET=your-google-client-secret
+
+# Must be a 16, 24, or 32-byte string or base64-encoded secret
+# Generate one using: python3 -c 'import os,base64; print(base64.b64encode(os.urandom(32)).decode())'
+OAUTH2_PROXY_COOKIE_SECRET=your-generated-cookie-secret
+
+# Absolute callback URL matching the Google Cloud Console setting
+OAUTH2_PROXY_REDIRECT_URL=https://your-domain.com/oauth2/callback
+```
+
+### 3. Configure Authorized Emails
+
+Only users listed in your authorized emails file will be granted access:
+1. Edit / create ${OAUTH2_DIR:-./oauth2}/authorized_emails.txt.
+2. Add allowed email addresses (one per line):
+```txt
+user1@gmail.com
+user2@example.com
+```
+3. Make sure OAUTH2_PROXY_EMAIL_DOMAINS is set to "*" in docker-compose.yml so that email filtering is handled by authorized_emails.txt.
+
+--- 
 
 ## 🐳 Start Docker compose
 
