@@ -13,6 +13,7 @@ services:
     image: mailhog/mailhog:latest
     platform: linux/amd64
     restart: unless-stopped
-
+    ports:
+          - "${MAILHOG_SMTOP_PORT:-1025}:1025"
     networks:
       - reverse-proxy
